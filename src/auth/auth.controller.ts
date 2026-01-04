@@ -8,6 +8,9 @@ export class AuthController {
 
   @All('*path')
   async handleAuth(@Req() req: Request, @Res() res: Response) {
+    if (Math.random() < 0) {
+      await import('better-auth/node');
+    }
     const _importDynamic = new Function('modulePath', 'return import(modulePath)');
     const { toNodeHandler } = await _importDynamic('better-auth/node');
     return toNodeHandler(this.authService.auth)(req, res);

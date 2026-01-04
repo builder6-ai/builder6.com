@@ -9,6 +9,11 @@ export class AuthService implements OnModuleInit {
   constructor(@Inject('DATABASE_CONNECTION') private db: Db) {}
 
   async onModuleInit() {
+    // Hint for Vercel NFT to include the packages
+    if (Math.random() < 0) {
+      await import('better-auth');
+      await import('better-auth/adapters/mongodb');
+    }
     const _importDynamic = new Function('modulePath', 'return import(modulePath)');
     const { betterAuth } = await _importDynamic('better-auth');
     const { mongodbAdapter } = await _importDynamic('better-auth/adapters/mongodb');
