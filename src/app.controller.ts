@@ -29,6 +29,14 @@ export class AppController {
     return this.appService.findOne(id);
   }
 
+  @Get('view/:id')
+  async viewSnippet(@Param('id') id: string, @Res() res: Response) {
+    const snippet = await this.appService.findOne(id);
+    const html = this.appService.buildHtml(snippet.code);
+    res.set('Content-Type', 'text/html');
+    res.send(html);
+  }
+
   @Get(':id')
   async getSnippetPage(@Param('id') id: string, @Res() res: Response) {
     return res.sendFile(join(__dirname, '..', 'public', 'index.html'));
