@@ -9,8 +9,9 @@ export class AuthService implements OnModuleInit {
   constructor(@Inject('DATABASE_CONNECTION') private db: Db) {}
 
   async onModuleInit() {
-    const { betterAuth } = await import('better-auth');
-    const { mongodbAdapter } = await import('better-auth/adapters/mongodb');
+    const _importDynamic = new Function('modulePath', 'return import(modulePath)');
+    const { betterAuth } = await _importDynamic('better-auth');
+    const { mongodbAdapter } = await _importDynamic('better-auth/adapters/mongodb');
 
     this.auth = betterAuth({
       database: mongodbAdapter(this.db),
