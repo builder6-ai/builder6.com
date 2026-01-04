@@ -174,7 +174,7 @@
             if (path && path.length > 1) {
                 const id = path.substring(1); // 去掉开头的 /
                 try {
-                    const response = await fetch(`/api/snippets/${id}`);
+                    const response = await fetch(`/api/play/snippets/${id}`);
                     if (response.ok) {
                         const data = await response.json();
                         return data.code;
@@ -189,7 +189,7 @@
             const id = params.get('id');
             if (id) {
                 try {
-                    const response = await fetch(`/api/snippets/${id}`);
+                    const response = await fetch(`/api/play/snippets/${id}`);
                     if (response.ok) {
                         const data = await response.json();
                         return data.code;
@@ -214,7 +214,7 @@
                 btn.innerHTML = `<span>Saving...</span>`;
                 
                 // 1. 保存到后端
-                const response = await fetch('/api/snippets', {
+                const response = await fetch('/api/play/snippets', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

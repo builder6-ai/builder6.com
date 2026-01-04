@@ -9,17 +9,17 @@ import { Snippet } from './schemas/snippet.schema';
 export class PlayController {
   constructor(private readonly playService: PlayService) {}
 
-  @Post('api/snippets')
+  @Post('api/play/snippets')
   async create(@Body() createSnippetDto: CreateSnippetDto): Promise<Snippet> {
     return this.playService.create(createSnippetDto);
   }
 
-  @Get('api/snippets')
+  @Get('api/play/snippets')
   async findAll(): Promise<Snippet[]> {
     return this.playService.findAll();
   }
 
-  @Get('api/snippets/:id')
+  @Get('api/play/snippets/:id')
   async findOne(@Param('id') id: string): Promise<Snippet> {
     return this.playService.findOne(id);
   }
