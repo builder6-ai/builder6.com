@@ -1,17 +1,26 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { join } from 'path';
 import { PlayService } from './play.service';
 import { CreateSnippetDto } from './dto/create-snippet.dto';
 import { Snippet } from './schemas/snippet.schema';
+import { SnippetVersion } from './schemas/snippet-version.schema';
+import { AuthService } from '../auth/auth.service';
+import { toNodeHandler } from 'better-auth/node';
 
 @Controller()
 export class PlayController {
-  constructor(private readonly playService: PlayService) {}
+  constructor(
+    private readonly playService: PlayService,
+    private readonly authService: AuthService
+  ) {}
 
   @Post('api/play/snippets')
-  async create(@Body() createSnippetDto: CreateSnippetDto): Promise<Snippet> {
-    return this.playService.create(createSnippetDto);
+  async create(@Body() createSnippetDto: CreateSnippetDto, @Req() req: Request): Promise<Snippet> {
+    const session = await this.authService.auth.api.getSession({
+        headers: new Headers(req.headers as any),
+    });
+    return this.playService.save(createSnippetDto, session?.user?.id);
   }
 
   @Get('api/play/snippets')
@@ -24,6 +33,11 @@ export class PlayController {
     return this.playService.findOne(id);
   }
 
+  @Get('api/play/snippets/:id/versions')
+  async getVersions(@Param('id') id: string): Promise<SnippetVersion[]> {
+    return this.playService.getVersions(id);
+  }
+
   @Get('view/:id')
   async viewSnippet(@Param('id') id: string, @Res() res: Response) {
     const snippet = await this.playService.findOne(id);
@@ -34,6 +48,6 @@ export class PlayController {
 
   @Get(':id')
   async getSnippetPage(@Param('id') id: string, @Res() res: Response) {
-    return res.sendFile(join(__dirname, '..', '..', 'public', 'index.html'));
+    return res.render('index');
   }
 }

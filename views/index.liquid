@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Builder6 Playground</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
     <style>
         html, body { height: 100%; margin: 0; overflow: hidden; }
         #editor { width: 100%; height: 100%; }
@@ -35,7 +34,7 @@
     <header class="flex items-center justify-between px-6 py-3 border-b border-gray-700 bg-gray-800">
         <div class="flex items-center gap-2">
             <svg class="w-6 h-6 text-sky-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"/></svg>
-            <h1 class="font-bold text-lg tracking-tight">Builder6 Play <span class="text-xs font-normal text-gray-400 ml-1">(Lite)</span></h1>
+            <h1 class="font-bold text-lg tracking-tight">Page Builder <span class="text-xs font-normal text-gray-400 ml-1">(Liquid)</span></h1>
         </div>
         <div class="flex items-center gap-4">
             <!-- Layout Controls -->
@@ -64,12 +63,76 @@
                 </button>
             </div>
 
-            <button id="shareBtn" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded text-sm font-medium transition flex items-center gap-2">
+            <button id="saveBtn" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded text-sm font-medium transition flex items-center gap-2">
+                <span>Save</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+            </button>
+
+            <button id="shareBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-1.5 rounded text-sm font-medium transition flex items-center gap-2">
                 <span>Share</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
             </button>
+
+            <button id="historyBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-1.5 rounded text-sm font-medium transition flex items-center gap-2">
+                <span>History</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+
+            <!-- Auth UI -->
+            <div id="authContainer" class="flex items-center gap-2 ml-2 border-l border-gray-700 pl-4">
+                <button id="signInBtn" class="text-gray-300 hover:text-white text-sm font-medium">Sign In</button>
+                <div id="userProfile" class="hidden flex items-center gap-2">
+                    <span id="userName" class="text-sm text-gray-300"></span>
+                    <button id="signOutBtn" class="text-gray-400 hover:text-white text-xs">Sign Out</button>
+                </div>
+            </div>
         </div>
     </header>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-xl w-96 border border-gray-700">
+            <h2 id="authTitle" class="text-xl font-bold mb-4 text-white">Sign In</h2>
+            <form id="authForm" class="space-y-4">
+                <div id="nameField" class="hidden">
+                    <label class="block text-sm text-gray-400 mb-1">Name</label>
+                    <input type="text" name="name" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Email</label>
+                    <input type="email" name="email" required class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Password</label>
+                    <input type="password" name="password" required class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white py-2 rounded font-medium transition">Submit</button>
+            </form>
+            <div class="mt-4 text-center text-sm text-gray-400">
+                <span id="authSwitchText">Don't have an account?</span>
+                <button id="authSwitchBtn" class="text-sky-400 hover:underline ml-1">Sign Up</button>
+            </div>
+            <button id="closeAuthModal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-xl w-[600px] border border-gray-700 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">Version History</h2>
+                <button id="closeHistoryModal" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="historyList" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                <!-- Versions will be injected here -->
+                <div class="text-gray-400 text-center py-4">Loading...</div>
+            </div>
+        </div>
+    </div>
 
     <main id="mainContainer" class="flex-1 flex overflow-hidden flex-row">
         <div id="editorWrapper" class="w-1/2 border-r border-gray-700 flex flex-col">
@@ -102,6 +165,8 @@
 </div>`;
 
         let editor;
+        let currentSnippetId = null;
+        let lastSavedCode = defaultCode;
 
         // 2. 初始化 Monaco Editor
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
@@ -112,6 +177,7 @@
             const codeFromUrl = await getCodeFromUrl();
             if (codeFromUrl) {
                 initialCode = codeFromUrl;
+                lastSavedCode = codeFromUrl;
             }
 
             editor = monaco.editor.create(document.getElementById('editor-container'), {
@@ -127,11 +193,12 @@
             // 监听内容变化，更新预览
             editor.onDidChangeModelContent(() => {
                 updatePreview();
-                updateUrl();
+                updateSaveButtonState();
             });
 
             // 初始化预览
             updatePreview();
+            updateSaveButtonState();
         });
 
         // 3. 更新预览 Iframe
@@ -160,12 +227,22 @@
             doc.close();
         }
 
-        // 4. URL 状态管理 (编码与解码)
-        // 使用 LZString 压缩，避免 URL 过长
-        function updateUrl() {
-            const code = editor.getValue();
-            const compressed = LZString.compressToEncodedURIComponent(code);
-            window.history.replaceState(null, '', '#' + compressed);
+        function updateSaveButtonState() {
+            const btn = document.getElementById('saveBtn');
+            const currentCode = editor.getValue();
+            const isChanged = currentCode !== lastSavedCode;
+            
+            if (isChanged) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.innerHTML = `<span>Save</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>`;
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.innerHTML = `<span>Saved</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+            }
         }
 
         async function getCodeFromUrl() {
@@ -177,6 +254,7 @@
                     const response = await fetch(`/api/play/snippets/${id}`);
                     if (response.ok) {
                         const data = await response.json();
+                        currentSnippetId = data._id;
                         return data.code;
                     }
                 } catch (e) {
@@ -192,51 +270,76 @@
                     const response = await fetch(`/api/play/snippets/${id}`);
                     if (response.ok) {
                         const data = await response.json();
+                        currentSnippetId = data._id;
                         return data.code;
                     }
                 } catch (e) {
                     console.error('Failed to load snippet', e);
                 }
             }
-
-            const hash = window.location.hash.substring(1);
-            if (!hash) return null;
-            return LZString.decompressFromEncodedURIComponent(hash);
+            return null;
         }
 
-        // 5. Share 按钮逻辑 (保存并复制链接)
-        document.getElementById('shareBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('shareBtn');
-            const originalText = btn.innerHTML;
+        // 5. Save 按钮逻辑
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveBtn');
             const code = editor.getValue();
             
             try {
                 btn.innerHTML = `<span>Saving...</span>`;
+                btn.disabled = true;
                 
                 // 1. 保存到后端
+                const payload = { code };
+                if (currentSnippetId) {
+                    payload.id = currentSnippetId;
+                }
+
                 const response = await fetch('/api/play/snippets', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ code }),
+                    body: JSON.stringify(payload),
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Saved:', data);
                     
+                    // 更新当前 ID
+                    currentSnippetId = data._id;
+                    lastSavedCode = code;
+
                     // 2. 更新 URL
                     const newUrl = window.location.origin + '/' + data._id;
                     window.history.pushState(null, '', '/' + data._id);
                     
-                    // 3. 复制到剪贴板
-                    await navigator.clipboard.writeText(newUrl);
-                    
-                    btn.innerHTML = `<span class="text-green-200">Copied!</span>`;
+                    updateSaveButtonState();
                 } else {
                     btn.innerHTML = `<span class="text-red-300">Failed</span>`;
+                    setTimeout(() => updateSaveButtonState(), 2000);
                 }
+            } catch (error) {
+                console.error('Error:', error);
+                btn.innerHTML = `<span class="text-red-300">Error</span>`;
+                setTimeout(() => updateSaveButtonState(), 2000);
+            }
+        });
+
+        // 6. Share 按钮逻辑
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('shareBtn');
+            const originalText = btn.innerHTML;
+            
+            if (!currentSnippetId) {
+                alert('Please save your snippet first!');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                btn.innerHTML = `<span class="text-green-200">Copied!</span>`;
             } catch (error) {
                 console.error('Error:', error);
                 btn.innerHTML = `<span class="text-red-300">Error</span>`;
@@ -247,7 +350,79 @@
             }, 2000);
         });
 
-        // 6. Layout & View Controls
+        // 7. History Logic
+        const historyModal = document.getElementById('historyModal');
+        const historyList = document.getElementById('historyList');
+        const closeHistoryModal = document.getElementById('closeHistoryModal');
+
+        document.getElementById('historyBtn').addEventListener('click', async () => {
+            if (!currentSnippetId) {
+                alert('Please save your snippet first to see history.');
+                return;
+            }
+
+            historyModal.classList.remove('hidden');
+            historyModal.classList.add('flex');
+            loadHistory();
+        });
+
+        closeHistoryModal.addEventListener('click', () => {
+            historyModal.classList.add('hidden');
+            historyModal.classList.remove('flex');
+        });
+
+        async function loadHistory() {
+            historyList.innerHTML = '<div class="text-gray-400 text-center py-4">Loading...</div>';
+            
+            try {
+                const res = await fetch(`/api/play/snippets/${currentSnippetId}/versions`);
+                if (res.ok) {
+                    const versions = await res.json();
+                    renderHistory(versions);
+                } else {
+                    historyList.innerHTML = '<div class="text-red-400 text-center py-4">Failed to load history</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                historyList.innerHTML = '<div class="text-red-400 text-center py-4">Error loading history</div>';
+            }
+        }
+
+        function renderHistory(versions) {
+            if (versions.length === 0) {
+                historyList.innerHTML = '<div class="text-gray-400 text-center py-4">No history versions found.</div>';
+                return;
+            }
+
+            historyList.innerHTML = versions.map(v => `
+                <div class="bg-gray-700 p-3 rounded flex justify-between items-center hover:bg-gray-600 transition">
+                    <div>
+                        <div class="text-sm font-medium text-white">Version ${v.versionId}</div>
+                        <div class="text-xs text-gray-400">${new Date(v.createdAt).toLocaleString()}</div>
+                    </div>
+                    <button onclick="restoreVersion('${v._id}')" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded text-xs">
+                        Restore
+                    </button>
+                </div>
+            `).join('');
+            
+            // Store versions for restore
+            window.snippetVersions = versions;
+        }
+
+        window.restoreVersion = function(versionId) {
+            const version = window.snippetVersions.find(v => v._id === versionId);
+            if (version) {
+                if (confirm('Are you sure you want to restore this version? Current changes will be lost if not saved.')) {
+                    editor.setValue(version.code);
+                    historyModal.classList.add('hidden');
+                    historyModal.classList.remove('flex');
+                    updateSaveButtonState(); // Will likely enable save button
+                }
+            }
+        };
+
+        // 8. Layout & View Controls
         const mainContainer = document.getElementById('mainContainer');
         const editorWrapper = document.getElementById('editorWrapper');
         const previewWrapper = document.getElementById('previewWrapper');
@@ -329,6 +504,123 @@
                 previewFrame.classList.remove('rounded-2xl');
             }
         }
+
+        // 7. Auth Logic
+        const authModal = document.getElementById('authModal');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const nameField = document.getElementById('nameField');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authSwitchBtn = document.getElementById('authSwitchBtn');
+        const signInBtn = document.getElementById('signInBtn');
+        const userProfile = document.getElementById('userProfile');
+        const userName = document.getElementById('userName');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const closeAuthModal = document.getElementById('closeAuthModal');
+
+        let isSignUp = false;
+        let currentUser = null;
+
+        // Check Session
+        async function checkSession() {
+            try {
+                const res = await fetch('/api/auth/get-session');
+                const data = await res.json();
+                if (data) {
+                    currentUser = data.user;
+                    updateAuthUI();
+                }
+            } catch (e) {
+                console.error('Failed to check session', e);
+            }
+        }
+        checkSession();
+
+        function updateAuthUI() {
+            if (currentUser) {
+                signInBtn.classList.add('hidden');
+                userProfile.classList.remove('hidden');
+                userName.textContent = currentUser.name || currentUser.email;
+            } else {
+                signInBtn.classList.remove('hidden');
+                userProfile.classList.add('hidden');
+                userName.textContent = '';
+            }
+        }
+
+        // Modal Controls
+        signInBtn.addEventListener('click', () => {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+        });
+
+        closeAuthModal.addEventListener('click', () => {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+        });
+
+        authSwitchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            if (isSignUp) {
+                authTitle.textContent = 'Sign Up';
+                nameField.classList.remove('hidden');
+                authSwitchText.textContent = 'Already have an account?';
+                authSwitchBtn.textContent = 'Sign In';
+            } else {
+                authTitle.textContent = 'Sign In';
+                nameField.classList.add('hidden');
+                authSwitchText.textContent = "Don't have an account?";
+                authSwitchBtn.textContent = 'Sign Up';
+            }
+        });
+
+        // Form Submit
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(authForm);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const name = formData.get('name');
+
+            const endpoint = isSignUp ? '/api/auth/sign-up/email' : '/api/auth/sign-in/email';
+            const body = isSignUp ? { email, password, name } : { email, password };
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    // better-auth returns session/user on success
+                    currentUser = data.user || data; 
+                    await checkSession();
+                    authModal.classList.add('hidden');
+                    authModal.classList.remove('flex');
+                    authForm.reset();
+                } else {
+                    const err = await res.json();
+                    alert(err.message || 'Authentication failed');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('An error occurred');
+            }
+        });
+
+        // Sign Out
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/auth/sign-out', { method: 'POST' });
+                currentUser = null;
+                updateAuthUI();
+            } catch (e) {
+                console.error(e);
+            }
+        });
     </script>
 </body>
 </html>
