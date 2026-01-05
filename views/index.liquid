@@ -54,7 +54,7 @@
         window.PAGE = {{ page | json }};
     </script>
 
-    {% render 'partials/header.liquid', is_editor: true %}
+    {% render 'partials/header.liquid', is_editor: true, project: project, user: user %}
 
     <!-- History Modal -->
     <div id="historyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity duration-300">
@@ -132,7 +132,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Project URL (Slug) <span class="text-red-500">*</span></label>
                     <div class="flex">
-                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-white/10 bg-white/5 text-gray-500 text-sm">/site/</span>
+                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-white/10 bg-white/5 text-gray-500 text-sm">/app/</span>
                         <input type="text" id="settingsProjectSlug" value="{{ project.slug }}" class="flex-1 bg-black/20 border border-white/10 rounded-r-lg px-3 py-2 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors">
                     </div>
                 </div>
@@ -178,7 +178,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     </button>
                 </div>
-                <div class="text-xs text-gray-500 truncate">/site/{{ project.slug }}</div>
+                <div class="text-xs text-gray-500 truncate">/app/{{ project.slug }}</div>
             </div>
 
             <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#2c2c2e]/50">
@@ -189,10 +189,17 @@
             </div>
             <div class="flex-1 overflow-y-auto p-2 space-y-1">
                 {% for p in pages %}
-                <a href="/projects/{{ projectId }}/{{ p._id }}/edit" class="block px-3 py-2 rounded-lg text-sm {% if p._id == page._id %}bg-blue-500/10 text-blue-400{% else %}text-gray-300 hover:bg-white/5 hover:text-white{% endif %} transition-colors truncate group flex justify-between items-center">
-                    <span>{{ p.name | default: "Untitled Page" }}</span>
-                    {% if p.homePage == p._id %}<span class="text-xs text-gray-500" title="Home Page">🏠</span>{% endif %}
-                </a>
+                <div class="group flex items-center justify-between px-3 py-2 rounded-lg text-sm {% if p._id == page._id %}bg-blue-500/10 text-blue-400{% else %}text-gray-300 hover:bg-white/5 hover:text-white{% endif %} transition-colors">
+                    <a href="/app/{{ project.slug | default: projectId }}/{{ p.path | default: p._id }}" class="flex-1 truncate flex items-center gap-2">
+                        <span>{{ p.name | default: "Untitled Page" }}</span>
+                        {% if p.homePage == p._id %}<span class="text-xs text-gray-500" title="Home Page">🏠</span>{% endif %}
+                    </a>
+                    {% if p._id == page._id %}
+                    <button id="pageSettingsBtnSidebar" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white transition-opacity p-1" title="Page Settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </button>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -391,19 +398,30 @@
         // Page Settings Modal Logic
         const pageSettingsModal = document.getElementById('pageSettingsModal');
         const pageSettingsBtn = document.getElementById('pageSettingsBtn');
+        const pageSettingsBtnSidebar = document.getElementById('pageSettingsBtnSidebar');
         const closePageSettingsModal = document.getElementById('closePageSettingsModal');
         const cancelPageSettings = document.getElementById('cancelPageSettings');
         const applyPageSettings = document.getElementById('applyPageSettings');
 
+        function openPageSettings() {
+            // Sync name from header input to settings input
+            const headerName = document.getElementById('pageNameInput').value;
+            if (headerName) {
+                document.getElementById('settingsPageName').value = headerName;
+            }
+            pageSettingsModal.classList.remove('hidden');
+            pageSettingsModal.classList.add('flex');
+        }
+
         if (pageSettingsBtn) {
-            pageSettingsBtn.addEventListener('click', () => {
-                // Sync name from header input to settings input
-                const headerName = document.getElementById('pageNameInput').value;
-                if (headerName) {
-                    document.getElementById('settingsPageName').value = headerName;
-                }
-                pageSettingsModal.classList.remove('hidden');
-                pageSettingsModal.classList.add('flex');
+            pageSettingsBtn.addEventListener('click', openPageSettings);
+        }
+
+        if (pageSettingsBtnSidebar) {
+            pageSettingsBtnSidebar.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openPageSettings();
             });
         }
 
@@ -555,8 +573,11 @@
                     // 2. 更新 URL
                     const projectId = window.PROJECT_ID || (window.PAGE && window.PAGE.projectId);
                     if (projectId) {
-                        const newUrl = window.location.origin + '/projects/' + projectId + '/' + data._id;
-                        window.history.pushState(null, '', '/projects/' + projectId + '/' + data._id);
+                        const projectSlug = window.PROJECT_SLUG || projectId;
+                        const pageSlug = data.path || data._id;
+                        const newPath = '/app/' + projectSlug + '/' + pageSlug;
+                        const newUrl = window.location.origin + newPath;
+                        window.history.pushState(null, '', newPath);
                     }
                     
                     updateSaveButtonState();
@@ -579,11 +600,13 @@
             }
 
             const pagePath = document.getElementById('settingsPagePath') ? document.getElementById('settingsPagePath').value : null;
-            let url = `${window.location.origin}/projects/${window.PROJECT_ID}/${currentPageId}`;
+            const projectSlug = window.PROJECT_SLUG || window.PROJECT_ID;
+            let url;
             
             if (pagePath) {
-                const projectSlug = window.PROJECT_SLUG || window.PROJECT_ID;
-                url = `${window.location.origin}/site/${projectSlug}/${pagePath}`;
+                url = `${window.location.origin}/app/${projectSlug}/${pagePath}`;
+            } else {
+                url = `${window.location.origin}/app/${projectSlug}/${currentPageId}`;
             }
 
             try {
@@ -721,11 +744,13 @@
             // If we have a saved page, open the live URL
             if (currentPageId && window.PROJECT_ID) {
                 const pagePath = document.getElementById('settingsPagePath') ? document.getElementById('settingsPagePath').value : null;
-                let url = `/projects/${window.PROJECT_ID}/${currentPageId}`;
+                const projectSlug = window.PROJECT_SLUG || window.PROJECT_ID;
+                let url;
                 
                 if (pagePath) {
-                    const projectSlug = window.PROJECT_SLUG || window.PROJECT_ID;
-                    url = `/site/${projectSlug}/${pagePath}`;
+                    url = `/app/${projectSlug}/${pagePath}`;
+                } else {
+                    url = `/app/${projectSlug}/${currentPageId}`;
                 }
                 
                 window.open(url, '_blank');
@@ -838,7 +863,9 @@
                 });
                 if (response.ok) {
                     const page = await response.json();
-                    window.location.href = '/projects/' + projectId + '/' + page._id;
+                    const projectSlug = window.PROJECT_SLUG || projectId;
+                    const pageSlug = page.path || page._id;
+                    window.location.href = '/app/' + projectSlug + '/' + pageSlug;
                 } else {
                     alert('Failed to create page');
                 }
