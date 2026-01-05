@@ -29,19 +29,19 @@ export class ProjectService {
       modified: now,
       modified_by: userId,
     };
-    await this.db.collection<Project>('play_projects').insertOne(project);
+    await this.db.collection<Project>('builder6_projects').insertOne(project);
     return project;
   }
 
   async findAll(userId: string): Promise<Project[]> {
-    return this.db.collection<Project>('play_projects')
+    return this.db.collection<Project>('builder6_projects')
       .find({ owner: userId })
       .sort({ modified: -1 })
       .toArray();
   }
 
   async findOne(id: string): Promise<Project> {
-    const project = await this.db.collection<Project>('play_projects').findOne({ _id: id });
+    const project = await this.db.collection<Project>('builder6_projects').findOne({ _id: id });
     if (!project) {
       throw new NotFoundException(`Project #${id} not found`);
     }
@@ -49,12 +49,12 @@ export class ProjectService {
   }
 
   async findBySlug(slug: string): Promise<Project | null> {
-    return this.db.collection<Project>('play_projects').findOne({ slug });
+    return this.db.collection<Project>('builder6_projects').findOne({ slug });
   }
 
   async update(id: string, userId: string, updateData: Partial<Project>): Promise<Project> {
     const now = new Date();
-    await this.db.collection<Project>('play_projects').updateOne(
+    await this.db.collection<Project>('builder6_projects').updateOne(
       { _id: id, owner: userId },
       { 
         $set: { 
@@ -68,6 +68,6 @@ export class ProjectService {
   }
 
   async delete(id: string, userId: string): Promise<void> {
-    await this.db.collection<Project>('play_projects').deleteOne({ _id: id, owner: userId });
+    await this.db.collection<Project>('builder6_projects').deleteOne({ _id: id, owner: userId });
   }
 }

@@ -24,7 +24,7 @@ export class PlayService {
 
     // 1. Try to update existing page if ID is provided
     if (id) {
-      const existingPage = await this.db.collection<Page>('play_pages').findOne({ _id: id });
+      const existingPage = await this.db.collection<Page>('builder6_pages').findOne({ _id: id });
       
       // If page exists AND belongs to the current user
       if (existingPage && existingPage.owner === userId && userId) {
@@ -41,7 +41,7 @@ export class PlayService {
         };
 
         // Save version
-        await this.db.collection<PageVersion>('play_page_versions').insertOne(newVersion);
+        await this.db.collection<PageVersion>('builder6_page_versions').insertOne(newVersion);
 
         // Update current page
         const updateFields: any = {
@@ -54,7 +54,7 @@ export class PlayService {
         if (path !== undefined) updateFields.path = path;
         if (addToNavigation !== undefined) updateFields.addToNavigation = addToNavigation;
 
-        await this.db.collection<Page>('play_pages').updateOne(
+        await this.db.collection<Page>('builder6_pages').updateOne(
           { _id: id },
           { $set: updateFields }
         );
@@ -78,19 +78,19 @@ export class PlayService {
       path,
       addToNavigation
     };
-    await this.db.collection<Page>('play_pages').insertOne(newPage);
+    await this.db.collection<Page>('builder6_pages').insertOne(newPage);
     return newPage;
   }
 
   async findAllByProject(projectId: string): Promise<Page[]> {
-    return this.db.collection<Page>('play_pages')
+    return this.db.collection<Page>('builder6_pages')
       .find({ projectId })
       .sort({ modified: -1 })
       .toArray();
   }
 
   async getVersions(pageId: string): Promise<PageVersion[]> {
-    return this.db.collection<PageVersion>('play_page_versions')
+    return this.db.collection<PageVersion>('builder6_page_versions')
       .find({ pageId })
       .sort({ created: -1 })
       .toArray();
@@ -98,12 +98,12 @@ export class PlayService {
 
   async findAll(userId?: string): Promise<Page[]> {
     const query = userId ? { owner: userId } : {};
-    return this.db.collection<Page>('play_pages').find(query).sort({ modified: -1 }).toArray();
+    return this.db.collection<Page>('builder6_pages').find(query).sort({ modified: -1 }).toArray();
   }
 
   async findOne(id: string): Promise<Page> {
     const page = await this.db
-      .collection<Page>('play_pages')
+      .collection<Page>('builder6_pages')
       .findOne({ _id: id });
     if (!page) {
       throw new NotFoundException(`Page #${id} not found`);
@@ -116,7 +116,7 @@ export class PlayService {
     if (page.owner !== userId) {
       throw new NotFoundException(`Page #${id} not found or you don't have permission`);
     }
-    await this.db.collection<Page>('play_pages').deleteOne({ _id: id });
+    await this.db.collection<Page>('builder6_pages').deleteOne({ _id: id });
   }
 
   buildHtml(page: Page, project?: Project, navPages: Page[] = [], editUrl?: string): string {
@@ -172,6 +172,6 @@ export class PlayService {
   }
 
   async findByPath(projectId: string, path: string): Promise<Page | null> {
-    return this.db.collection<Page>('play_pages').findOne({ projectId, path });
+    return this.db.collection<Page>('builder6_pages').findOne({ projectId, path });
   }
 }
