@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Res, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
-import { PlayService } from './play.service';
+import { PageService } from './page.service';
 import { ProjectService } from './project.service';
 
 @Controller('app')
 export class SiteController {
   constructor(
-    private readonly playService: PlayService,
+    private readonly PageService: PageService,
     private readonly projectService: ProjectService,
   ) {}
 
@@ -33,12 +33,12 @@ export class SiteController {
       return res.status(404).send('This project does not have a home page set.');
     }
 
-    const page = await this.playService.findOne(project.homePage);
+    const page = await this.PageService.findOne(project.homePage);
     if (!page) {
       return res.status(404).send('Home page not found.');
     }
 
-    const pages = await this.playService.findAllByProject(project._id!);
+    const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
     const editUrl = `/projects/${project._id}/${page._id}`;
 
@@ -53,12 +53,12 @@ export class SiteController {
   ) {
     const project = await this.resolveProject(slug);
 
-    const page = await this.playService.findOne(pageId);
+    const page = await this.PageService.findOne(pageId);
     if (!page || page.projectId !== project._id) {
       throw new NotFoundException('Page not found');
     }
 
-    const pages = await this.playService.findAllByProject(project._id!);
+    const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
     const editUrl = `/projects/${project._id}/${page._id}`;
 
@@ -73,12 +73,12 @@ export class SiteController {
   ) {
     const project = await this.resolveProject(slug);
 
-    const page = await this.playService.findByPath(project._id!, path);
+    const page = await this.PageService.findByPath(project._id!, path);
     if (!page) {
       throw new NotFoundException('Page not found');
     }
 
-    const pages = await this.playService.findAllByProject(project._id!);
+    const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
     const editUrl = `/projects/${project._id}/${page._id}`;
 

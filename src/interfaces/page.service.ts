@@ -6,7 +6,7 @@ import { PageVersion } from './schemas/page-version.schema';
 import { CreatePageDto } from './dto/create-page.dto';
 
 @Injectable()
-export class PlayService {
+export class PageService {
   constructor(@Inject('DATABASE_CONNECTION') private db: Db) {}
 
   private generateId(length = 6): string {

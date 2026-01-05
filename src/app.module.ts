@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PlayModule } from './interfaces/play.module';
+import { InterfaceModule } from './interfaces/interface.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -11,7 +11,7 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: ['.env.local', '.env'],
       isGlobal: true,
     }),
-    PlayModule, 
+    InterfaceModule, 
     AuthModule
   ],
   controllers: [AppController],

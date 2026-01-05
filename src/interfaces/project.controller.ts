@@ -2,14 +2,14 @@ import { Body, Controller, Get, Param, Post, Put, Delete, Req, Res, Render, Redi
 import { Request, Response } from 'express';
 import { ProjectService } from './project.service';
 import { AuthService } from '../auth/auth.service';
-import { PlayService } from './play.service';
+import { PageService } from './page.service';
 
 @Controller('projects')
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
     private readonly authService: AuthService,
-    private readonly playService: PlayService
+    private readonly PageService: PageService
   ) {}
 
   @Get()
@@ -64,7 +64,7 @@ export class ProjectController {
   </div>
 </div>`;
 
-    const page = await this.playService.save({
+    const page = await this.PageService.save({
       code: defaultCode,
       projectId: project._id,
       name: 'Home',
@@ -91,7 +91,7 @@ export class ProjectController {
     }
     
     // Find pages belonging to this project
-    const pages = await this.playService.findAllByProject(id);
+    const pages = await this.PageService.findAllByProject(id);
     
     if (pages.length > 0) {
       // Redirect to the first page (or home page if we can identify it, but first is fine for now)
@@ -142,13 +142,13 @@ export class ProjectController {
       headers: new Headers(req.headers as any),
     });
 
-    const page = await this.playService.findOne(pageId);
+    const page = await this.PageService.findOne(pageId);
     if (!page) {
       return res.redirect(`/projects/${projectId}`);
     }
 
     const project = await this.projectService.findOne(projectId);
-    const pages = await this.playService.findAllByProject(projectId);
+    const pages = await this.PageService.findAllByProject(projectId);
 
     return res.render('editor', { page, projectId, project, pages, user: session?.user });
   }
