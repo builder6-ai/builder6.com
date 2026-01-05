@@ -45,8 +45,8 @@ export class ProjectController {
       return res.redirect('/login');
     }
     const project = await this.projectService.findOne(id);
-    // Find snippets belonging to this project
-    const snippets = await this.playService.findAllByProject(id);
-    return res.render('projects/show', { project, snippets, user: session.user });
+    // Find pages belonging to this project
+    const pages = await this.playService.findAllByProject(id);
+    return res.render('projects/show', { project, pages, user: session.user });
   }
 }

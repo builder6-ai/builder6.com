@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, Delete } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { join } from 'path';
 import { PlayService } from './play.service';
-import { CreateSnippetDto } from './dto/create-snippet.dto';
-import { Snippet } from './schemas/snippet.schema';
-import { SnippetVersion } from './schemas/snippet-version.schema';
+import { CreatePageDto } from './dto/create-page.dto';
+import { Page } from './schemas/page.schema';
+import { PageVersion } from './schemas/page-version.schema';
 import { AuthService } from '../auth/auth.service';
 
 @Controller()
@@ -14,59 +14,71 @@ export class PlayController {
     private readonly authService: AuthService
   ) {}
 
-  @Get('my-snippets')
-  async mySnippets(@Req() req: Request, @Res() res: Response) {
+  @Get('my-pages')
+  async myPages(@Req() req: Request, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
     if (!session) {
       return res.redirect('/login');
     }
-    const snippets = await this.playService.findAll(session.user.id);
-    return res.render('my-snippets', { snippets, user: session.user });
+    const pages = await this.playService.findAll(session.user.id);
+    return res.render('my-pages', { pages: pages, user: session.user });
   }
 
-  @Post('api/play/snippets')
-  async create(@Body() createSnippetDto: CreateSnippetDto, @Req() req: Request): Promise<Snippet> {
+  @Post('api/pages')
+  async create(@Body() createPageDto: CreatePageDto, @Req() req: Request): Promise<Page> {
     const session = await this.authService.auth.api.getSession({
         headers: new Headers(req.headers as any),
     });
-    return this.playService.save(createSnippetDto, session?.user?.id);
+    return this.playService.save(createPageDto, session?.user?.id);
   }
 
-  @Get('api/play/snippets')
-  async findAll(@Req() req: Request): Promise<Snippet[]> {
+  @Get('api/pages')
+  async findAll(@Req() req: Request): Promise<Page[]> {
     const session = await this.authService.auth.api.getSession({
         headers: new Headers(req.headers as any),
     });
     return this.playService.findAll(session?.user?.id);
   }
 
-  @Get('api/play/snippets/:id')
-  async findOne(@Param('id') id: string): Promise<Snippet> {
+  @Get('api/pages/:id')
+  async findOne(@Param('id') id: string): Promise<Page> {
     return this.playService.findOne(id);
   }
 
-  @Get('api/play/snippets/:id/versions')
-  async getVersions(@Param('id') id: string): Promise<SnippetVersion[]> {
+  @Get('api/pages/:id/versions')
+  async getVersions(@Param('id') id: string): Promise<PageVersion[]> {
     return this.playService.getVersions(id);
   }
 
   @Get('view/:id')
-  async viewSnippet(@Param('id') id: string, @Res() res: Response) {
-    const snippet = await this.playService.findOne(id);
-    const html = this.playService.buildHtml(snippet.code);
+  async viewPage(@Param('id') id: string, @Res() res: Response) {
+    const page = await this.playService.findOne(id);
+    const html = this.playService.buildHtml(page.code);
     res.set('Content-Type', 'text/html');
     res.send(html);
   }
 
   @Get('pages/:pageId')
-  async getSnippetPage(@Param('pageId') id: string, @Res() res: Response) {
-    const snippet = await this.playService.findOne(id);
-    if (!snippet) {
+  async getPage(@Param('pageId') id: string, @Res() res: Response) {
+    const page = await this.playService.findOne(id);
+    if (!page) {
       return res.redirect('/');
     }
-    return res.render('index', { snippet });
+    return res.render('index', { page: page });
+  }
+
+  @Delete('pages/:id')
+  async delete(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    const session = await this.authService.auth.api.getSession({
+      headers: new Headers(req.headers as any),
+    });
+    if (!session) {
+      return res.status(401).send('Unauthorized');
+    }
+    await this.playService.delete(id, session.user.id);
+    return res.status(200).send('Deleted');
   }
 }
 

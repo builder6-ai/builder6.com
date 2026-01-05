@@ -1,4 +1,4 @@
-export class Snippet {
+export class Page {
   _id?: string;
   projectId?: string;
   name?: string; // Optional name for the page

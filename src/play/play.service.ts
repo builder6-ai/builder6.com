@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Db } from 'mongodb';
-import { Snippet } from './schemas/snippet.schema';
-import { SnippetVersion } from './schemas/snippet-version.schema';
-import { CreateSnippetDto } from './dto/create-snippet.dto';
+import { Page } from './schemas/page.schema';
+import { PageVersion } from './schemas/page-version.schema';
+import { CreatePageDto } from './dto/create-page.dto';
 
 @Injectable()
 export class PlayService {
@@ -17,32 +17,32 @@ export class PlayService {
     return result;
   }
 
-  async save(createSnippetDto: CreateSnippetDto, userId?: string): Promise<Snippet> {
-    const { code, id, projectId, name } = createSnippetDto;
+  async save(createPageDto: CreatePageDto, userId?: string): Promise<Page> {
+    const { code, id, projectId, name } = createPageDto;
     const now = new Date();
 
-    // 1. Try to update existing snippet if ID is provided
+    // 1. Try to update existing page if ID is provided
     if (id) {
-      const existingSnippet = await this.db.collection<Snippet>('play_snippets').findOne({ _id: id });
+      const existingPage = await this.db.collection<Page>('play_pages').findOne({ _id: id });
       
-      // If snippet exists AND belongs to the current user
-      if (existingSnippet && existingSnippet.owner === userId && userId) {
-        const newVersion: SnippetVersion = {
+      // If page exists AND belongs to the current user
+      if (existingPage && existingPage.owner === userId && userId) {
+        const newVersion: PageVersion = {
           _id: this.generateId(),
-          snippetId: id,
-          code: existingSnippet.code, // Save previous code as version
+          pageId: id,
+          code: existingPage.code, // Save previous code as version
           versionId: this.generateId(4),
           
           // Steedos Standard Fields
-          owner: existingSnippet.owner,
-          created: existingSnippet.modified || existingSnippet.created,
-          created_by: existingSnippet.modified_by || existingSnippet.created_by,
+          owner: existingPage.owner,
+          created: existingPage.modified || existingPage.created,
+          created_by: existingPage.modified_by || existingPage.created_by,
         };
 
         // Save version
-        await this.db.collection<SnippetVersion>('play_snippet_versions').insertOne(newVersion);
+        await this.db.collection<PageVersion>('play_page_versions').insertOne(newVersion);
 
-        // Update current snippet
+        // Update current page
         const updateFields: any = {
           code: code,
           modified: now,
@@ -50,17 +50,17 @@ export class PlayService {
         };
         if (name) updateFields.name = name;
 
-        await this.db.collection<Snippet>('play_snippets').updateOne(
+        await this.db.collection<Page>('play_pages').updateOne(
           { _id: id },
           { $set: updateFields }
         );
         
-        return { ...existingSnippet, ...updateFields };
+        return { ...existingPage, ...updateFields };
       }
     }
 
-    // 2. Create new snippet (Fork or New)
-    const newSnippet: Snippet = {
+    // 2. Create new page (Fork or New)
+    const newPage: Page = {
       _id: this.generateId(),
       code,
       owner: userId,
@@ -71,37 +71,45 @@ export class PlayService {
       projectId: projectId,
       name: name || 'Untitled Page'
     };
-    await this.db.collection<Snippet>('play_snippets').insertOne(newSnippet);
-    return newSnippet;
+    await this.db.collection<Page>('play_pages').insertOne(newPage);
+    return newPage;
   }
 
-  async findAllByProject(projectId: string): Promise<Snippet[]> {
-    return this.db.collection<Snippet>('play_snippets')
+  async findAllByProject(projectId: string): Promise<Page[]> {
+    return this.db.collection<Page>('play_pages')
       .find({ projectId })
       .sort({ modified: -1 })
       .toArray();
   }
 
-  async getVersions(snippetId: string): Promise<SnippetVersion[]> {
-    return this.db.collection<SnippetVersion>('play_snippet_versions')
-      .find({ snippetId })
+  async getVersions(pageId: string): Promise<PageVersion[]> {
+    return this.db.collection<PageVersion>('play_page_versions')
+      .find({ pageId })
       .sort({ created: -1 })
       .toArray();
   }
 
-  async findAll(userId?: string): Promise<Snippet[]> {
+  async findAll(userId?: string): Promise<Page[]> {
     const query = userId ? { owner: userId } : {};
-    return this.db.collection<Snippet>('play_snippets').find(query).sort({ modified: -1 }).toArray();
+    return this.db.collection<Page>('play_pages').find(query).sort({ modified: -1 }).toArray();
   }
 
-  async findOne(id: string): Promise<Snippet> {
-    const snippet = await this.db
-      .collection<Snippet>('play_snippets')
+  async findOne(id: string): Promise<Page> {
+    const page = await this.db
+      .collection<Page>('play_pages')
       .findOne({ _id: id });
-    if (!snippet) {
-      throw new NotFoundException(`Snippet #${id} not found`);
+    if (!page) {
+      throw new NotFoundException(`Page #${id} not found`);
     }
-    return snippet;
+    return page;
+  }
+
+  async delete(id: string, userId: string): Promise<void> {
+    const page = await this.findOne(id);
+    if (page.owner !== userId) {
+      throw new NotFoundException(`Page #${id} not found or you don't have permission`);
+    }
+    await this.db.collection<Page>('play_pages').deleteOne({ _id: id });
   }
 
   buildHtml(code: string): string {

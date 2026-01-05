@@ -1,6 +1,6 @@
-export class SnippetVersion {
+export class PageVersion {
   _id?: string;
-  snippetId: string;
+  pageId: string;
   code: string;
   versionId: string;
 
