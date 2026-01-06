@@ -99,6 +99,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
     <script>
@@ -126,10 +127,159 @@
             // Listen for changes
             editor.onDidChangeModelContent(() => {
                 updateSaveButtonState();
+                updatePreview();
             });
 
             updateSaveButtonState();
+            updatePreview();
         });
+
+        // 2. Preview Logic
+        function updatePreview() {
+            const schema = editor.getValue();
+            const previewFrame = document.getElementById('preview');
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+            try {
+                const obj = jsyaml.load(schema);
+                
+                if (!obj) {
+                    renderEmpty(doc, 'Start typing to see preview...');
+                    return;
+                }
+
+                renderForm(doc, obj);
+            } catch (e) {
+                renderError(doc, e.message);
+            }
+        }
+
+        function renderForm(doc, obj) {
+            const fields = obj.fields || {};
+            const label = obj.label || obj.name || 'Untitled Object';
+            const icon = obj.icon || 'cube';
+
+            let fieldsHtml = '';
+            
+            for (const [key, field] of Object.entries(fields)) {
+                fieldsHtml += generateFieldHtml(key, field);
+            }
+
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <style>
+                        body { background-color: #f9fafb; }
+                    </style>
+                </head>
+                <body class="p-6">
+                    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <!-- Header -->
+                        <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
+                                <span class="material-icons text-xl">${icon.substring(0,2)}</span>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-semibold text-gray-900">${label}</h1>
+                                <p class="text-xs text-gray-500">New Record</p>
+                            </div>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="p-6 space-y-6">
+                            ${fieldsHtml || '<p class="text-center text-gray-400 py-8">No fields defined yet.</p>'}
+                            
+                            <!-- Actions -->
+                            <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                                <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 shadow-sm">Cancel</button>
+                                <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            doc.open();
+            doc.write(html);
+            doc.close();
+        }
+
+        function generateFieldHtml(key, field) {
+            const label = field.label || key;
+            const required = field.required ? '<span class="text-red-500">*</span>' : '';
+            const help = field.help ? `<p class="mt-1 text-xs text-gray-500">${field.help}</p>` : '';
+            
+            let inputHtml = '';
+
+            switch (field.type) {
+                case 'textarea':
+                    inputHtml = `<textarea class="w-full rounded-lg border-gray-300 border shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 min-h-[100px]" placeholder="Enter ${label.toLowerCase()}..."></textarea>`;
+                    break;
+                case 'select':
+                    const options = field.options || [];
+                    const optionsHtml = options.map(opt => {
+                        const val = typeof opt === 'object' ? opt.value : opt;
+                        const lbl = typeof opt === 'object' ? opt.label : opt;
+                        return `<option value="${val}">${lbl}</option>`;
+                    }).join('');
+                    inputHtml = `
+                        <select class="w-full rounded-lg border-gray-300 border shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 bg-white">
+                            <option value="">Select an option...</option>
+                            ${optionsHtml}
+                        </select>`;
+                    break;
+                case 'boolean':
+                    inputHtml = `
+                        <div class="flex items-center h-6 mt-2">
+                            <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                            <span class="ml-2 text-sm text-gray-600">Yes, enable this option</span>
+                        </div>`;
+                    break;
+                case 'date':
+                case 'datetime':
+                    inputHtml = `<input type="date" class="w-full rounded-lg border-gray-300 border shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5">`;
+                    break;
+                default: // text, number, etc.
+                    inputHtml = `<input type="text" class="w-full rounded-lg border-gray-300 border shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5" placeholder="Enter ${label.toLowerCase()}...">`;
+            }
+
+            return `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">${label} ${required}</label>
+                    ${inputHtml}
+                    ${help}
+                </div>
+            `;
+        }
+
+        function renderEmpty(doc, msg) {
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"><\/script></head>
+                <body class="h-screen flex items-center justify-center bg-gray-50 text-gray-400 text-sm">
+                    ${msg}
+                </body></html>
+            `);
+            doc.close();
+        }
+
+        function renderError(doc, msg) {
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"><\/script></head>
+                <body class="p-6 bg-red-50 h-screen">
+                    <div class="text-red-600 font-mono text-sm bg-white p-4 rounded-lg shadow-sm border border-red-200">
+                        <strong>YAML Error:</strong><br/>${msg}
+                    </div>
+                </body></html>
+            `);
+            doc.close();
+        }
 
         // 2. Save Logic
         function updateSaveButtonState() {
