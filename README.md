@@ -1,98 +1,96 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Builder6 
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A powerful low-code/no-code app builder designed to streamline the creation of enterprise applications. Built with NestJS, Liquid templates, and integrated with advanced AI capabilities for generating UI and data models.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Key Features
 
-## Description
+*   **Multi-Tenant Organization Management**: Seamlessly manage multiple organizations and team members.
+*   **AI-Powered Generation**:
+    *   **UI Generation**: Generate responsive HTML/Tailwind CSS pages from natural language prompts using models like Gemini 3 Pro and GPT-4o.
+    *   **Schema Generation**: Automatically define Steedos Object schemas based on descriptions.
+*   **Project & Object Management**:
+    *   Create and organize projects within organizations.
+    *   Define complex data models using YAML with support for various field types (Text, Number, Logic, Relationships, Formulas, etc.).
+*   **Liquid Template Engine**: Fast server-side rendering using LiquidJS.
+*   **Modern Auth**: Secure authentication and session management powered by Better-Auth.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠 Tech Stack
 
-## Project setup
+*   **Backend Framework**: [NestJS](https://nestjs.com/)
+*   **Database**: [MongoDB](https://www.mongodb.com/)
+*   **Template Engine**: [LiquidJS](https://liquidjs.com/)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+*   **AI Integration**: OpenAI SDK (compatible with Google Gemini, OpenAI GPT models)
 
-```bash
-$ yarn install
+## 📂 Project Structure
+
+```
+├── public/             # Static assets (JS, CSS)
+├── src/
+│   ├── ai/             # AI service for generating code & objects
+│   ├── auth/           # Authentication module (Better-Auth)
+│   ├── database/       # MongoDB connection providers
+│   ├── objects/        # Object schema management & generation
+│   ├── organizations/  # Organization & tenant logic
+│   ├── pages/          # Page management & rendering
+│   ├── projects/       # Project container logic
+│   ├── app.module.ts   # Root application module
+│   └── main.ts         # Entry point
+├── views/              # Liquid templates for UI
+└── STEEDOS_FIELDS.md   # Reference for supported field types
 ```
 
-## Compile and run the project
+## ⚡️ Getting Started
+
+### Prerequisites
+
+*   Node.js (v18+)
+*   MongoDB (Running instance)
+*   Yarn or npm
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/builder6app/interfaces.builder6.com.git
+    cd interfaces.builder6.com
+    ```
+
+2.  Install dependencies:
+    ```bash
+    yarn install
+    ```
+
+3.  Configure environment variables:
+    Create a `.env` file in the root directory and add:
+    ```env
+    # Database
+    MONGODB_URI=mongodb://localhost:27017/builder6
+
+    # Authentication
+    BETTER_AUTH_SECRET=your_secret_key
+    BETTER_AUTH_URL=http://localhost:3000
+
+    # AI Configuration (Optional)
+    OPENAI_API_KEY=your_api_key
+    OPENAI_BASE_URL=https://api.openai.com/v1 # or other compatible endpoint
+    OPENAI_MODEL_DEFAULT=google/gemini-3-pro-preview
+    ```
+
+### Running the Application
 
 ```bash
-# development
-$ yarn run start
+# Development mode
+yarn start:dev
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+# Production mode
+yarn start:prod
 ```
 
-## Run tests
+Access the application at `http://localhost:3000`.
 
-```bash
-# unit tests
-$ yarn run test
+## 🤖 AI Usage
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ yarn install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+The application includes an AI helper for generating content.
+*   **Page Generator**: Describe specific UI requirements (e.g., "Create a dashboard with a sidebar and data table") to generate HTML.
+*   **Object Generator**: Describe your data needs to generate valid Steedos YAML schemas (refer to `STEEDOS_FIELDS.md` for supported types).
