@@ -56,11 +56,11 @@
                         window.location.href = '/org';
                     } else {
                         const error = await res.json();
-                        alert(error.message || 'Failed to create organization');
+                        $notify(error.message || 'Failed to create organization', 'error');
                     }
                 } catch (err) {
                      console.error(err);
-                     alert('An error occurred');
+                     $notify('An error occurred', 'error');
                 }
             }
         }))

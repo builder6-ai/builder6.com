@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Project - Builder6</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col items-center justify-center">
 
+    {% render 'partials/notifications.liquid' %}
     <div class="bg-[#1c1c1e] p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-white/10 ring-1 ring-white/5">
         <h2 class="text-xl font-bold text-white mb-6">Create New Project</h2>
         <form id="createProjectForm" onsubmit="createProject(event)">
@@ -83,12 +86,12 @@
                         slugError.textContent = 'This slug is already taken. Please choose another one.';
                         slugError.classList.remove('hidden');
                     } else {
-                        alert(data.message || 'Failed to create project');
+                        $notify(data.message || 'Failed to create project', 'error');
                     }
                 }
             } catch (err) {
                 console.error(err);
-                alert('Error creating project');
+                $notify('Error creating project', 'error');
             } finally {
                 createBtn.disabled = false;
             }

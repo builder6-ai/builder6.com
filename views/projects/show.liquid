@@ -11,6 +11,7 @@
 <body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
 
     {% render 'partials/header.liquid', is_editor: false, user: user %}
+    {% render 'partials/notifications.liquid' %}
 
     <main class="flex-1 container mx-auto px-6 py-8 max-w-5xl" x-data="projectShow('{{ project._id }}')">
         <!-- Breadcrumb -->
@@ -152,11 +153,11 @@
                         const page = await response.json();
                         window.location.href = '/app/' + projectId + '/' + page._id;
                     } else {
-                        alert('Failed to create page');
+                        $notify('Failed to create page', 'error');
                     }
                 } catch (e) {
                     console.error(e);
-                    alert('An error occurred');
+                    $notify('An error occurred', 'error');
                 }
             },
 
@@ -171,11 +172,11 @@
                     if (response.ok) {
                         window.location.reload();
                     } else {
-                        alert('Failed to delete page');
+                        $notify('Failed to delete page', 'error');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred');
+                    $notify('An error occurred', 'error');
                 }
             }
         }))

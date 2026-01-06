@@ -13,7 +13,6 @@
     </style>
 </head>
 <body class="flex flex-col h-screen bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white overflow-hidden">
-    {% render 'partials/notifications.liquid' %}
 
     <script>
         window.PROJECT_ID = "{{ projectId }}";
@@ -22,12 +21,13 @@
     </script>
 
     {% render 'partials/header.liquid', is_page_editor: true, project: project, user: user %}
+    {% render 'partials/notifications.liquid' %}
 
     <!-- Editor Toolbar -->
     <div class="flex items-center justify-between px-6 py-2 border-b border-white/10 bg-[#1c1c1e] z-40">
         <div class="flex items-center gap-2">
              <div class="flex items-center gap-2">
-                <a href="/app/{{ project.slug | default: project._id }}" class="text-sm text-gray-400 hover:text-white transition-colors">{{ project.name }}</a>
+                <a href="/app/{{ project._id }}" class="text-sm text-gray-400 hover:text-white transition-colors">{{ project.name }}</a>
                 <span class="text-gray-600">/</span>
                 <input type="text" id="pageNameInput" class="bg-transparent border border-transparent hover:border-white/10 focus:border-blue-500 rounded px-2 py-1 text-sm text-white focus:outline-none transition-colors w-48" placeholder="Untitled Page">
             </div>
@@ -637,11 +637,11 @@
                     if (response.ok) {
                         window.location.reload();
                     } else {
-                        $notify('Failed to update project', 'error');
+                        alert('Failed to update project');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    $notify('An error occurred', 'error');
+                    alert('An error occurred');
                 }
             });
         }
@@ -658,11 +658,11 @@
                     if (response.ok) {
                         window.location.href = '/app';
                     } else {
-                        $notify('Failed to delete project', 'error');
+                        alert('Failed to delete project');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    $notify('An error occurred', 'error');
+                    alert('An error occurred');
                 }
             });
         }
@@ -741,7 +741,7 @@
         // 6. Share 按钮逻辑
         document.getElementById('shareBtn').addEventListener('click', async () => {
             if (!currentPageId || !window.PROJECT_ID) {
-                $notify('Please save the page first to share.', 'warning');
+                alert('Please save the page first to share.');
                 return;
             }
 
@@ -752,13 +752,12 @@
                 const btn = document.getElementById('shareBtn');
                 const originalContent = btn.innerHTML;
                 btn.innerHTML = `<span>Copied!</span><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
-                $notify('URL copied to clipboard!', 'success');
                 setTimeout(() => {
                     btn.innerHTML = originalContent;
                 }, 2000);
             } catch (err) {
                 console.error('Failed to copy: ', err);
-                $notify('Failed to copy URL to clipboard', 'error');
+                alert('Failed to copy URL to clipboard');
             }
         });
 
@@ -771,7 +770,7 @@
         if (historyBtn) {
             historyBtn.addEventListener('click', async () => {
                 if (!currentPageId) {
-                    $notify('Please save your page first to see history.', 'warning');
+                    alert('Please save your page first to see history.');
                     return;
                 }
 
@@ -946,11 +945,11 @@
                     const page = await response.json();
                     window.location.href = '/app/' + projectId + '/' + page._id;
                 } else {
-                    $notify('Failed to create page', 'error');
+                    alert('Failed to create page');
                 }
             } catch (e) {
                 console.error(e);
-                $notify('An error occurred', 'error');
+                alert('An error occurred');
             }
         }
 

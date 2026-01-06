@@ -64,11 +64,11 @@
                     if (res.ok) {
                         window.location.reload();
                     } else {
-                        alert('Failed to switch organization');
+                        $notify('Failed to switch organization', 'error');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Error switching organization');
+                    $notify('Error switching organization', 'error');
                 }
             }
         }))

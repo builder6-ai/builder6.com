@@ -1,25 +1,11 @@
-
-<svg width="340" height="340" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
-  <g fill="#8bc34a">
-    <rect x="10" y="10" width="100" height="100" rx="50"/>
-    <rect x="120" y="10" width="100" height="100" rx="50"/>
-  </g>
-
-  <g fill="#ffc107">
-    <rect x="230" y="10" width="100" height="100" rx="50"/>
-    <rect x="230" y="120" width="100" height="100" rx="50"/>
-  </g>
-
-  <g fill="#ff5722">
-    <rect x="10" y="120" width="100" height="100" rx="50"/>
-    <rect x="10" y="230" width="100" height="100" rx="50"/>
-  </g>
-
-  <rect x="120" y="120" width="100" height="100" rx="50" fill="#EFEFEF"/>
-
-  <g fill="#03a9f4">
-    <rect x="120" y="230" width="100" height="100" rx="50"/>
-    <rect x="230" y="230" width="100" height="100" rx="50"/>
-  </g>
-
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask_round_rect_huge_star" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="28" y="28" width="200" height="200">
+<rect x="28" y="28" width="200" height="200" rx="45" fill="white"/>
+</mask>
+<g mask="url(#mask_round_rect_huge_star)">
+<path d="M0 0H128V60C128 97.5 97.5 128 60 128H0V0Z" fill="#4285F4"/>
+<path d="M256 0H128V60C128 97.5 158.5 128 196 128H256V0Z" fill="#EA4335"/>
+<path d="M0 256H128V196C128 158.5 97.5 128 60 128H0V256Z" fill="#34A853"/>
+<path d="M256 256H128V196C128 158.5 158.5 128 196 128H256V256Z" fill="#FBBC05"/>
+</g>
 </svg>

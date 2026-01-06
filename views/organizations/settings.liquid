@@ -76,19 +76,21 @@
                     });
                     
                     if (res.ok) {
-                        alert('Organization updated successfully');
-                        if (this.slug !== '{{ organization.slug }}') {
-                             window.location.href = `/org/${this.slug}/settings`;
-                        } else {
-                             window.location.reload();
-                        }
+                        $notify('Organization updated successfully', 'success');
+                        setTimeout(() => {
+                            if (this.slug !== '{{ organization.slug }}') {
+                                window.location.href = `/org/${this.slug}/settings`;
+                            } else {
+                                window.location.reload();
+                            }
+                        }, 1000);
                     } else {
                         const error = await res.json();
-                        alert(error.message || 'Failed to update organization');
+                        $notify(error.message || 'Failed to update organization', 'error');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('An error occurred');
+                    $notify('An error occurred', 'error');
                 }
             },
 
@@ -106,11 +108,11 @@
                         window.location.href = '/org';
                     } else {
                         const error = await res.json();
-                        alert(error.message || 'Failed to delete organization');
+                        $notify(error.message || 'Failed to delete organization', 'error');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('An error occurred');
+                    $notify('An error occurred', 'error');
                 }
             }
         }))

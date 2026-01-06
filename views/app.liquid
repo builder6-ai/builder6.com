@@ -13,6 +13,7 @@
 <body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
 
     {% render 'partials/header.liquid', is_editor: false, user: user %}
+    {% render 'partials/notifications.liquid' %}
 
     <main class="flex-1">
         {% block content %}{% endblock %}
