@@ -46,68 +46,98 @@
     </div>
 
     <div class="flex flex-1 overflow-hidden">
-        <!-- Sidebar / Prompt Area -->
-        <div class="w-1/3 border-r border-white/10 flex flex-col bg-[#1c1c1e]">
-            <div class="p-6 border-b border-white/10">
-                <h2 class="text-xl font-bold mb-2">AI Object Generator</h2>
-                <p class="text-sm text-gray-400">Describe the data object you want to build. AI will generate the Steedos Object YAML for you.</p>
-            </div>
-            
-            <div class="p-6 flex-1 flex flex-col space-y-4 overflow-y-auto">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Instructions</label>
-                    <textarea id="promptInput" rows="6" 
-                        class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                        placeholder="e.g., Create a 'Task' object with fields for title, description, due date, priority (High, Medium, Low), and assigned user."></textarea>
-                </div>
+        <!-- Sidebar Removed -->
 
-                <div class="flex items-center justify-end">
-                    <button id="generateBtn" onclick="generateSchema()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        <span>Generate Schema</span>
-                    </button>
-                </div>
+        <!-- Main Content / Code Editor -->
+        <div id="editorWrapper" class="flex-1 flex flex-col bg-[#1c1c1e] border-r border-white/10 relative">
+            <div id="editor-container" class="flex-1 relative"></div>
+        </div>
 
-                <div id="statusMessage" class="hidden rounded-lg p-4 text-sm"></div>
+        <!-- Preview -->
+        <div id="previewWrapper" class="flex-1 bg-white relative min-w-0">
+            <!-- This iframe will host the rendered Object form/list preview -->
+            <div class="absolute inset-0 bg-gray-50 flex items-center justify-center text-gray-400">
+                <iframe id="preview" class="w-full h-full border-none"></iframe>
             </div>
         </div>
 
-        <!-- Main Content / Code Editor -->
-        <div class="flex-1 flex flex-col bg-[#0d0d0d] relative">
-
-            <!-- Toolbar Removed -->
-
+        <!-- AI Chat Sidebar -->
+        <div id="aiChatSidebar" class="w-80 md:w-96 bg-[#1c1c1e] border-l border-white/10 flex-col transition-all duration-300 flex">
+            <div class="p-4 border-b border-white/10 bg-[#2c2c2e] flex justify-between items-center">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <span class="text-xl">✨</span> AI Object Designer
+                </h3>
+            </div>
             
-            <div class="flex-1 relative">
-                <textarea id="resultOutput" 
-                    class="absolute inset-0 w-full h-full bg-[#0d0d0d] text-gray-300 p-6 code-editor text-sm focus:outline-none resize-none"
-                    spellcheck="false"
-                    placeholder="# Describe your object on the left and click 'Generate', or type YAML here...">{{ object.schema }}</textarea>
-                
-                <!-- Loading Overlay -->
-                <div id="loadingOverlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-10">
-                    <div class="flex flex-col items-center gap-3">
-                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
-                        <span class="text-white font-medium">Generating Schema...</span>
+            <div id="aiChatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-xs flex-shrink-0">AI</div>
+                    <div class="bg-white/10 rounded-2xl rounded-tl-none px-4 py-2 text-sm text-gray-200">
+                        Hi! describe the data object you want to build. I will generate the Steedos Object YAML for you.
                     </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-white/10 bg-[#2c2c2e]">
+                <div class="mb-3">
+                    <div class="relative">
+                        <select id="aiModelSelect" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none transition-colors appearance-none cursor-pointer hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <option value="gpt-4o">Loading models...</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <textarea id="aiChatInput" rows="1" class="w-full bg-black/20 border border-white/10 rounded-xl pl-4 pr-10 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none transition-colors resize-none text-sm" placeholder="Describe your object..."></textarea>
+                    <button id="aiChatSend" class="absolute right-2 top-2 p-1.5 text-purple-500 hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const generateBtn = document.getElementById('generateBtn');
-        const promptInput = document.getElementById('promptInput');
-        const resultOutput = document.getElementById('resultOutput');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const statusMessage = document.getElementById('statusMessage');
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
+    <script>
         const isNew = {{ isNew | default: false }};
         const objectId = "{{ object._id }}";
         const projectId = "{{ projectId }}";
+        const initialSchema = {{ object.schema | json | default: "''" }};
+
+        let editor;
+
+        // 1. Initialize Monaco Editor
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: initialSchema || '# Describe your object in AI chat, or type YAML here...',
+                language: 'yaml',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                padding: { top: 20 }
+            });
+
+            // Listen for changes
+            editor.onDidChangeModelContent(() => {
+                updateSaveButtonState();
+            });
+
+            updateSaveButtonState();
+        });
+
+        // 2. Save Logic
+        function updateSaveButtonState() {
+             // Basic state management
+        }
 
         async function saveObject() {
-            const schema = resultOutput.value.trim();
+            const schema = editor.getValue().trim();
             if (!schema) {
                 $notify('Please enter or generate a schema first', 'warning');
                 return;
@@ -154,67 +184,144 @@
             }
         }
 
-        async function generateSchema() {
-            const prompt = promptInput.value.trim();
-            if (!prompt) return;
-
-            // UI State: Loading
-            generateBtn.disabled = true;
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.classList.add('flex');
-            statusMessage.classList.add('hidden');
-
-            try {
-                const response = await fetch(`/app/${projectId}/objects/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-
-                if (!response.ok) throw new Error('Generation failed');
-
-                const data = await response.json();
-                
-                // Update specific part of UI
-                resultOutput.value = data.params; // 'params' contains the YAML content from backend
-
-                showStatus('Schema generated successfully!', 'success');
-
-            } catch (error) {
-                console.error(error);
-                showStatus('Failed to generate schema. Please try again.', 'error');
-            } finally {
-                // UI State: Reset
-                generateBtn.disabled = false;
-                loadingOverlay.classList.add('hidden');
-                loadingOverlay.classList.remove('flex');
-            }
-        }
-
         function showStatus(msg, type) {
             $notify(msg, type);
         }
 
         function copyToClipboard() {
-            resultOutput.select();
-            document.execCommand('copy');
-            // Deselect
-            window.getSelection().removeAllRanges();
-            
-            const originalText = document.querySelector('button[onclick="copyToClipboard()"]').textContent;
-            document.querySelector('button[onclick="copyToClipboard()"]').textContent = 'Copied!';
-            setTimeout(() => {
-                document.querySelector('button[onclick="copyToClipboard()"]').textContent = originalText;
-            }, 2000);
+            const val = editor.getValue();
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = document.querySelector('button[onclick="copyToClipboard()"]');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
         }
         
-        // Allow Cmd+Enter to submit
-        promptInput.addEventListener('keydown', function(e) {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                e.preventDefault();
-                generateSchema();
+        // 3. AI Chat Logic (Copied and adapted from Page Editor)
+        const aiChatInput = document.getElementById('aiChatInput');
+        const aiChatSend = document.getElementById('aiChatSend');
+        const aiChatMessages = document.getElementById('aiChatMessages');
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = 'flex gap-3 ' + (role === 'user' ? 'flex-row-reverse' : '');
+            
+            const avatar = role === 'user' 
+                ? `<div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs flex-shrink-0">You</div>`
+                : `<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-xs flex-shrink-0">AI</div>`;
+            
+            const bubble = `<div class="${role === 'user' ? 'bg-blue-600 text-white' : 'bg-white/10 text-gray-200'} rounded-2xl ${role === 'user' ? 'rounded-tr-none' : 'rounded-tl-none'} px-4 py-2 text-sm whitespace-pre-wrap">${text}</div>`;
+            
+            div.innerHTML = role === 'user' ? bubble + avatar : avatar + bubble;
+            aiChatMessages.appendChild(div);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        }
+
+        async function handleAiSend() {
+            const prompt = aiChatInput.value.trim();
+            if (!prompt) return;
+
+            addMessage('user', prompt);
+            aiChatInput.value = '';
+            aiChatInput.style.height = 'auto';
+
+            // Show loading
+            const loadingId = 'ai-loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'flex gap-3';
+            loadingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-xs flex-shrink-0">AI</div>
+                <div class="bg-white/10 rounded-2xl rounded-tl-none px-4 py-2 text-sm text-gray-200 flex items-center gap-2">
+                    <span>Thinking</span>
+                    <span class="animate-bounce">.</span><span class="animate-bounce delay-100">.</span><span class="animate-bounce delay-200">.</span>
+                </div>
+            `;
+            aiChatMessages.appendChild(loadingDiv);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+
+            try {
+                const currentCode = editor ? editor.getValue() : '';
+                const model = document.getElementById('aiModelSelect').value;
+                const response = await fetch('/api/ai/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, currentCode, model, type: 'object' })
+                });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+
+                if (response.ok && data.code) {
+                    addMessage('ai', 'I have updated the Object schema based on your request.');
+                    editor.setValue(data.code);
+                } else {
+                    addMessage('ai', 'Sorry, something went wrong: ' + (data.message || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error(e);
+                if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                addMessage('ai', 'Sorry, I encountered a network error.');
             }
-        });
+        }
+
+        if (aiChatSend) aiChatSend.addEventListener('click', handleAiSend);
+        if (aiChatInput) {
+            aiChatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAiSend();
+                }
+            });
+            // Auto resize
+            aiChatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        }
+
+        // Fetch and cache models (Same as Page Editor - reuse logic ideally)
+        async function loadModels() {
+            const modelSelect = document.getElementById('aiModelSelect');
+            if (!modelSelect) return;
+
+            const fallbackModels = [
+                { id: 'gpt-4o' },
+                { id: 'google/gemini-3-pro-preview' }
+            ];
+
+            try {
+                const res = await fetch('/api/ai/models');
+                if (res.ok) {
+                    let models = await res.json();
+                    // If backend returns empty array (e.g. no API key), use fallback
+                    if (!models || !Array.isArray(models) || models.length === 0) {
+                        models = fallbackModels;
+                    }
+                    renderModels(models);
+                } else {
+                     renderModels(fallbackModels);
+                }
+            } catch (e) { 
+                console.error('Error loading models:', e); 
+                renderModels(fallbackModels);
+            }
+        }
+
+        function renderModels(models) {
+            const modelSelect = document.getElementById('aiModelSelect');
+            if (!modelSelect) return;
+            modelSelect.innerHTML = models.map(m => `<option value="${m.id}">${m.id}</option>`).join('');
+            const savedModel = localStorage.getItem('ai_selected_model');
+            if (savedModel) modelSelect.value = savedModel;
+            modelSelect.addEventListener('change', () => localStorage.setItem('ai_selected_model', modelSelect.value));
+        }
+
+        loadModels();
+
     </script>
 </body>
 </html>

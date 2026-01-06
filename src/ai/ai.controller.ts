@@ -7,9 +7,9 @@ export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('generate')
-  async generate(@Body() body: { prompt: string; currentCode?: string; model?: string }, @Res() res: Response) {
+  async generate(@Body() body: { prompt: string; currentCode?: string; model?: string; type?: 'page' | 'object' }, @Res() res: Response) {
     try {
-      const result = await this.aiService.generateCode(body.prompt, body.currentCode, body.model);
+      const result = await this.aiService.generateCode(body.prompt, body.currentCode, body.model, body.type);
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });

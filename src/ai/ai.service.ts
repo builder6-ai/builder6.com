@@ -33,7 +33,12 @@ export class AiService {
     });
   }
 
-  async generateCode(prompt: string, currentCode?: string, model?: string) {
+  async generateCode(prompt: string, currentCode?: string, model?: string, type: 'page' | 'object' = 'page') {
+    if (type === 'object') {
+      const result = await this.generateObjectDefinition(prompt, model, currentCode);
+      return { code: result.params };
+    }
+
     const systemPrompt = `You are an expert web developer and UI designer. 
     Your task is to generate or modify HTML/Tailwind CSS code based on the user's request.
     
@@ -72,9 +77,18 @@ export class AiService {
 
   async getModels() {
     if (this.models && this.models.length > 0) return this.models;
+    
+    // Default fallback models
+    const fallbackModels = [
+      { id: 'gpt-4o' },
+      { id: 'gpt-4o-mini' },
+      { id: 'google/gemini-3-pro-preview' }
+    ];
+
     if (!this.configService.get<string>('OPENAI_API_KEY')) {
-      return [];
+      return fallbackModels;
     }
+    
     try {
       const list = await this.openai.models.list();
       // Filter for coding capable models from major providers supported by Vercel AI Gateway
@@ -87,22 +101,25 @@ export class AiService {
         return 0;
       });
       
-      this.models = models;
+      this.models = models.length > 0 ? models : fallbackModels;
       return this.models;
     } catch (e) {
       console.error('Failed to fetch models from OpenAI', e);
       // Fallback list for Vercel AI Gateway
-      return []
+      return fallbackModels;
     }
   }
 
-  async generateObjectDefinition(prompt: string, model?: string) {
+  async generateObjectDefinition(prompt: string, model?: string, currentCode?: string) {
     const systemPrompt = `You are an expert Steedos Platform developer.
-    Your task is to generate a Steedos Object YAML definition (.object.yml) based on the user's request.
+    Your task is to generate or modify a Steedos Object YAML definition (.object.yml) based on the user's request.
     
     The YAML should include standard properties: name, label, icon, version: 2, and fields.
     Common Field types: text, textarea, select, boolean, date, datetime, number, currency, lookup, master_detail, html, markdown.
     
+    If 'currentCode' is provided, you should modify it according to the user's instructions.
+    If 'currentCode' is not provided, you should generate a new object from scratch.
+
     Example structure:
     name: project
     label: Project
@@ -124,7 +141,9 @@ export class AiService {
     Return ONLY the YAML code. Do not include markdown backticks or explanations.
     `;
 
-    const userMessage = `User Request: ${prompt}`;
+    const userMessage = currentCode 
+    ? `Current YAML:\n${currentCode}\n\nUser Request: ${prompt}`
+    : `User Request: ${prompt}`;
 
     const completion = await this.openai.chat.completions.create({
       messages: [
