@@ -30,23 +30,36 @@
                 <textarea name="description" id="projectDescription" rows="3" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="What is this project about?"></textarea>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-400 text-sm font-medium mb-2">Project Icon</label>
-                <div class="flex items-center gap-3">
-                     <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xl text-white">
-                        <i id="iconPreview" class="ri-building-4-line"></i>
-                    </div>
-                    <div class="flex-1 relative">
-                        <input type="text" id="projectIcon" name="icon" class="w-full bg-black/50 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-gray-600" placeholder="e.g. ri-rocket-line">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                            <i class="ri-search-line"></i>
-                        </div>
-                    </div>
-                    <button type="button" onclick="openIconPicker('projectIcon', 'iconPreview')" class="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 transition-colors whitespace-nowrap">
-                        Select Icon
-                    </button>
+            <div class="mb-6 grid grid-cols-2 gap-4">
+                <div>
+                   <label class="block text-gray-400 text-sm font-medium mb-2">Project Icon</label>
+                   <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xl text-white overflow-hidden" id="iconPreviewContainer">
+                           <i id="iconPreview" class="ri-building-4-line"></i>
+                       </div>
+                       <button type="button" onclick="openIconPicker('projectIcon', 'iconPreview')" class="flex-1 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 transition-colors whitespace-nowrap text-left truncate">
+                           Select Icon
+                       </button>
+                       <input type="hidden" id="projectIcon" name="icon">
+                   </div>
                 </div>
-                 <p class="text-xs text-gray-500 mt-1">Select an icon from the library or type a class name.</p>
+                <div>
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Theme Color</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" name="themeColor" id="projectColor" value="#3b82f6" oninput="updatePreviewColor(this.value)" class="h-10 w-14 bg-transparent border-0 p-0 cursor-pointer rounded-lg overflow-hidden">
+                        <input type="text" oninput="document.getElementById('projectColor').value = this.value; updatePreviewColor(this.value)" class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" placeholder="#3b82f6">
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function updatePreviewColor(color) {
+                    const container = document.getElementById('iconPreviewContainer');
+                    if (container) {
+                        container.style.backgroundColor = color;
+                    }
+                }
+            </script>
                 <script>
                     document.getElementById('projectIcon').addEventListener('input', (e) => {
                          const icon = e.target.value.trim() || 'ri-building-4-line';

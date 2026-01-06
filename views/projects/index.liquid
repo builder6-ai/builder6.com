@@ -26,7 +26,7 @@
             <div class="p-5">
                 <div class="flex justify-between items-start mb-3">
                      <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white shrink-0 group-hover:bg-blue-500/10 group-hover:text-blue-400 group-hover:border-blue-500/20 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white shrink-0 overflow-hidden group-hover:bg-blue-500/10 group-hover:text-blue-400 group-hover:border-blue-500/20 transition-colors" {% if project.themeColor %}style="background-color: {{ project.themeColor }}"{% endif %}>
                             <i class="{{ project.icon | default: 'ri-building-4-line' }} text-lg"></i>
                         </div>
                         <h3 class="text-white font-semibold text-lg truncate group-hover:text-blue-400 transition-colors">{{ project.name }}</h3>
