@@ -1,11 +1,24 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="mask_round_rect_huge_star" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="28" y="28" width="200" height="200">
-<rect x="28" y="28" width="200" height="200" rx="45" fill="white"/>
-</mask>
-<g mask="url(#mask_round_rect_huge_star)">
-<path d="M0 0H128V60C128 97.5 97.5 128 60 128H0V0Z" fill="#4285F4"/>
-<path d="M256 0H128V60C128 97.5 158.5 128 196 128H256V0Z" fill="#EA4335"/>
-<path d="M0 256H128V196C128 158.5 97.5 128 60 128H0V256Z" fill="#34A853"/>
-<path d="M256 256H128V196C128 158.5 158.5 128 196 128H256V256Z" fill="#FBBC05"/>
-</g>
+<defs>
+<linearGradient id="g_blue" x1="50" y1="90" x2="110" y2="150" gradientUnits="userSpaceOnUse">
+<stop stop-color="#4285F4"/><stop offset="1" stop-color="#3367D6"/>
+</linearGradient>
+<linearGradient id="g_red" x1="100" y1="40" x2="160" y2="100" gradientUnits="userSpaceOnUse">
+<stop stop-color="#EA4335"/><stop offset="1" stop-color="#C5221F"/>
+</linearGradient>
+<linearGradient id="g_green" x1="100" y1="140" x2="160" y2="210" gradientUnits="userSpaceOnUse">
+<stop stop-color="#34A853"/><stop offset="1" stop-color="#188038"/>
+</linearGradient>
+<linearGradient id="g_yellow" x1="140" y1="90" x2="210" y2="150" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FBBC05"/><stop offset="1" stop-color="#F29900"/>
+</linearGradient>
+</defs>
+
+<circle cx="78" cy="128" r="46" fill="url(#g_blue)"/>
+
+<circle cx="128" cy="78" r="46" fill="url(#g_red)"/>
+
+<circle cx="128" cy="178" r="46" fill="url(#g_green)"/>
+
+<circle cx="178" cy="128" r="46" fill="url(#g_yellow)"/>
 </svg>
