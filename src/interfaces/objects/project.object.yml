@@ -1,0 +1,35 @@
+name: builder6_projects
+label: Projects
+icon: project
+version: 2
+fields:
+  name:
+    type: text
+    label: Name
+    required: true
+    searchable: true
+  description:
+    type: textarea
+    label: Description
+    is_wide: true
+  slug:
+    type: text
+    label: Slug
+    index: true
+  homePage:
+    type: text
+    label: Home Page
+  displayNavigation:
+    type: boolean
+    label: Display Navigation
+  navigationStyle:
+    type: select
+    label: Navigation Style
+    options:
+      - label: Top
+        value: top
+      - label: Left
+        value: left
+  themeColor:
+    type: text
+    label: Theme Color

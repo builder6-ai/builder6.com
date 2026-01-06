@@ -95,4 +95,54 @@ export class AiService {
       return []
     }
   }
+
+  async generateObjectDefinition(prompt: string, model?: string) {
+    const systemPrompt = `You are an expert Steedos Platform developer.
+    Your task is to generate a Steedos Object YAML definition (.object.yml) based on the user's request.
+    
+    The YAML should include standard properties: name, label, icon, version: 2, and fields.
+    Common Field types: text, textarea, select, boolean, date, datetime, number, currency, lookup, master_detail, html, markdown.
+    
+    Example structure:
+    name: project
+    label: Project
+    icon: project
+    version: 2
+    fields:
+      name:
+        type: text
+        label: Name
+        required: true
+        searchable: true
+      status:
+        type: select
+        label: Status
+        options:
+          - label: Draft
+            value: draft
+    
+    Return ONLY the YAML code. Do not include markdown backticks or explanations.
+    `;
+
+    const userMessage = `User Request: ${prompt}`;
+
+    const completion = await this.openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      model: model || this.defaultModel,
+    });
+
+    let content = completion.choices[0].message.content || '';
+    
+    // Clean up markdown code blocks if present
+    if (content.startsWith('```yaml')) {
+      content = content.replace(/^```yaml\n/, '').replace(/\n```$/, '');
+    } else if (content.startsWith('```')) {
+      content = content.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+
+    return { params: content };
+  }
 }
