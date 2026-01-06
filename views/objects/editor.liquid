@@ -390,6 +390,7 @@
             updateSaveButtonState();
             setTimeout(updatePreview, 500); // Initial load
             initDragAndDrop(); // Init Palette DnD
+            initPaletteClick(); // Click to add support
         });
 
         // 2. Preview & Designer Logic
@@ -621,6 +622,47 @@
             } catch (e) {
                 console.error(e);
             }
+        }
+
+        function initPaletteClick() {
+            const palette = document.getElementById('fieldsPalette');
+            if (!palette) return;
+
+            palette.addEventListener('click', function(e) {
+                const item = e.target.closest('.palette-item');
+                if (item) {
+                   const type = item.getAttribute('data-type');
+                   if(type) handleAddFieldClick(type);
+                }
+            });
+        }
+
+        function handleAddFieldClick(type) {
+             const schema = editor.getValue();
+             let obj = {};
+             try {
+                obj = jsyaml.load(schema) || {};
+             } catch (e) { console.error(e); }
+             
+             if (!obj.fields) obj.fields = {};
+             const keys = Object.keys(obj.fields);
+             
+             let insertIndex = keys.length; // Default to end
+             
+             // If a field is currently selected, insert after it
+             if (currentSelectedFieldKey && obj.fields[currentSelectedFieldKey]) {
+                 const currentIndex = keys.indexOf(currentSelectedFieldKey);
+                 if (currentIndex !== -1) {
+                     insertIndex = currentIndex + 1;
+                 }
+             }
+
+             const fieldName = generateFieldName(type);
+             
+             // Set selection to new field so it gets highlighted on refresh
+             currentSelectedFieldKey = fieldName;
+             
+             addFieldToYaml(fieldName, type, insertIndex);
         }
 
         function reorderFieldsInYaml(oldIndex, newIndex) {
