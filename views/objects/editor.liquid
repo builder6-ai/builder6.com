@@ -15,7 +15,7 @@
 </head>
 <body class="flex flex-col h-screen bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white">
 
-    {% render 'partials/header.liquid', is_editor: true, project: project, user: user %}
+    {% render 'partials/header.liquid', is_page_editor: false, is_object_editor: true, project: project, user: user %}
 
     <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar / Prompt Area -->
