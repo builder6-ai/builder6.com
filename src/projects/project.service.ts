@@ -15,14 +15,22 @@ export class ProjectService {
     return result;
   }
 
-  async create(userId: string, name: string, description?: string): Promise<Project> {
+  async create(userId: string, name: string, description?: string, slug?: string): Promise<Project> {
     const now = new Date();
     const id = this.generateId();
+    const projectSlug = slug || id;
+
+    // Check slug uniqueness
+    const existing = await this.db.collection('builder6_projects').findOne({ slug: projectSlug });
+    if (existing) {
+        throw new Error('Project with this slug already exists.');
+    }
+
     const project: Project = {
       _id: id,
       name,
       description,
-      slug: id,
+      slug: projectSlug,
       owner: userId,
       created: now,
       created_by: userId,

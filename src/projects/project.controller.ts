@@ -26,6 +26,17 @@ export class ProjectController {
     return res.render('projects/index', { projects, user: session.user });
   }
 
+  @Get('new')
+  async new(@Req() req: Request, @Res() res: Response) {
+      const session = await this.authService.auth.api.getSession({
+        headers: new Headers(req.headers as any),
+      });
+      if (!session) {
+        return res.redirect('/login');
+      }
+      return res.render('projects/new', { user: session.user });
+  }
+
   @Get(':id')
   async show(@Req() req: Request, @Param('id') id: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({

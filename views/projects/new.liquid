@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Project - Builder6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col items-center justify-center">
+
+    <div class="bg-[#1c1c1e] p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-white/10 ring-1 ring-white/5">
+        <h2 class="text-xl font-bold text-white mb-6">Create New Project</h2>
+        <form id="createProjectForm" onsubmit="createProject(event)">
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-medium mb-2">Project Name <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="projectName" required oninput="generateSlug()" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="My Awesome Project">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-medium mb-2">Project Slug (URL) <span class="text-red-500">*</span></label>
+                <div class="flex items-center">
+                     <span class="bg-white/5 border border-r-0 border-white/10 rounded-l-lg px-3 py-2 text-gray-400 text-sm">/app/</span>
+                    <input type="text" name="slug" id="projectSlug" oninput="this.dataset.manual='true'; this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');" pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens are allowed" required class="flex-1 bg-black/50 border border-white/10 rounded-r-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="my-awesome-project">
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Must be unique and URL-friendly.</p>
+                <p id="slugError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-400 text-sm font-medium mb-2">Description</label>
+                <textarea name="description" id="projectDescription" rows="3" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="What is this project about?"></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+                <a href="/app" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</a>
+                <button type="submit" id="createBtn" class="bg-[#007AFF] hover:bg-[#0062cc] text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <span>Create Project</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function generateSlug() {
+            const name = document.getElementById('projectName').value;
+            const slugInput = document.getElementById('projectSlug');
+            
+            // If user has manually edited the slug, don't overwrite it
+            if (slugInput.dataset.manual === 'true') {
+                return;
+            }
+
+            if (name) {
+                slugInput.value = name.toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+        }
+
+        async function createProject(e) {
+            e.preventDefault();
+            const name = document.getElementById('projectName').value;
+            const slug = document.getElementById('projectSlug').value;
+            const description = document.getElementById('projectDescription').value;
+            const createBtn = document.getElementById('createBtn');
+            const slugError = document.getElementById('slugError');
+
+            createBtn.disabled = true;
+            slugError.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, slug, description })
+                });
+
+                if (res.ok) {
+                    const project = await res.json();
+                    window.location.href = `/app/${project._id}`;
+                } else {
+                    const data = await res.json();
+                    if (data.message && data.message.includes('unique')) {
+                        slugError.textContent = 'This slug is already taken. Please choose another one.';
+                        slugError.classList.remove('hidden');
+                    } else {
+                        alert(data.message || 'Failed to create project');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error creating project');
+            } finally {
+                createBtn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>

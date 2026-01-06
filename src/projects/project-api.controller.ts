@@ -12,18 +12,20 @@ export class ProjectApiController {
     private readonly pageService: PageService
   ) {}
 
-  @Post()
-  async create(@Req() req: Request, @Body('name') name: string, @Body('description') description: string, @Res() res: Response) {
+    @Post()
+  async create(@Req() req: Request, @Body('name') name: string, @Body('description') description: string, @Body('slug') slug: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
     if (!session) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-    const project = await this.projectService.create(session.user.id, name, description);
     
-    // Create default Home Page
-    const defaultCode = `<div class="min-h-screen bg-[#000000] flex items-center justify-center font-sans antialiased">
+    try {
+        const project = await this.projectService.create(session.user.id, name, description, slug);
+        
+        // Create default Home Page (Using correct reference if moved to PagesModule, for now keep logic here or delegate)
+        const defaultCode = `<div class="min-h-screen bg-[#000000] flex items-center justify-center font-sans antialiased">
   <div class="w-80 bg-[#1c1c1e] rounded-[2rem] p-6 shadow-2xl border border-white/10 relative overflow-hidden">
     <!-- Background Blur Blob -->
     <div class="absolute top-[-20%] right-[-20%] w-40 h-40 bg-blue-500/30 rounded-full blur-[50px]"></div>
@@ -51,21 +53,21 @@ export class ProjectApiController {
     </div>
   </div>
 </div>`;
+        const homePage = await this.pageService.save({
+          projectId: project._id!,
+          name: 'Home',
+          code: defaultCode,
+          slug: 'home'
+        }, session.user.id);
 
-    const page = await this.pageService.save({
-      code: defaultCode,
-      projectId: project._id,
-      name: 'Home',
-      slug: 'home',
-      addToNavigation: true
-    }, session.user.id);
-
-    // Set as home page
-    if (project._id && page._id) {
-        await this.projectService.update(project._id, session.user.id, { homePage: page._id });
+        if (homePage._id) {
+          await this.projectService.update(project._id!, session.user.id!, { homePage: homePage._id });
+        }
+        
+        return res.status(201).json(project);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
     }
-    
-    return res.status(201).json(project);
   }
 
   @Put(':id')
