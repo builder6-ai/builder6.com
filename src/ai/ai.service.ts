@@ -5,8 +5,24 @@ import OpenAI from 'openai';
 @Injectable()
 export class AiService {
   private openai: OpenAI;
+  private defaultModel = 'google/gemini-3-pro-preview';
+  private allowedKeywords: string[] = [
+    'gpt-5', 
+    'gemini-3',
+  ];
+  private models: any[] = [];
 
   constructor(private configService: ConfigService) {
+    const defaultModel = this.configService.get<string>('OPENAI_MODEL_DEFAULT');
+    if (defaultModel) {
+      this.defaultModel = defaultModel;
+    }
+
+    const items = this.configService.get<string>('OPENAI_MODEL_ALLOWED');
+    if (items) {
+      this.allowedKeywords = items.split(',').map(k => k.trim());
+    }
+
     if (!this.configService.get<string>('OPENAI_API_KEY')) {
       console.error('OPENAI_API_KEY is not set in the environment variables');
       return;
@@ -39,7 +55,7 @@ export class AiService {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      model: model || this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
+      model: model || this.defaultModel,
     });
 
     let content = completion.choices[0].message.content || '';
@@ -55,25 +71,28 @@ export class AiService {
   }
 
   async getModels() {
+    if (this.models && this.models.length > 0) return this.models;
+    if (!this.configService.get<string>('OPENAI_API_KEY')) {
+      return [];
+    }
     try {
       const list = await this.openai.models.list();
       // Filter for coding capable models from major providers supported by Vercel AI Gateway
-      const allowedKeywords = [
-        'gpt', 
-        'claude', 
-        'gemini',
-      ];
       // Also allow any model that might be passed via env or specific ones we know
-      return list.data.filter(m => allowedKeywords.some(am => m.id.toLowerCase().includes(am)));
+      const models = list.data.filter(m => this.allowedKeywords.some(am => m.id.toLowerCase().includes(am)));
+      
+      models.sort((a, b) => {
+        if (a.id === this.defaultModel) return -1;
+        if (b.id === this.defaultModel) return 1;
+        return 0;
+      });
+      
+      this.models = models;
+      return this.models;
     } catch (e) {
       console.error('Failed to fetch models from OpenAI', e);
       // Fallback list for Vercel AI Gateway
-      return [
-        { id: 'gpt-4o', object: 'model', created: 0, owned_by: 'openai' },
-        { id: 'anthropic/claude-3-5-sonnet', object: 'model', created: 0, owned_by: 'anthropic' },
-        { id: 'google/gemini-1.5-pro', object: 'model', created: 0, owned_by: 'google' },
-        { id: 'google/gemini-2.0-flash-exp', object: 'model', created: 0, owned_by: 'google' }
-      ];
+      return []
     }
   }
 }
