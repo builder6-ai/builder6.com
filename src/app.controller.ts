@@ -10,17 +10,4 @@ export class AppController {
   index(@Res() res: Response) {
     return res.redirect('/app');
   }
-
-
-  @Get('login')
-  @Render('login')
-  getLogin() {
-    return {};
-  }
-
-  @Get('register')
-  @Render('register')
-  register() {
-    return {};
-  }
 }

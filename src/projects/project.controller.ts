@@ -20,7 +20,7 @@ export class ProjectController {
       headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
 
     // Require active organization
@@ -43,7 +43,7 @@ export class ProjectController {
         headers: new Headers(req.headers as any),
       });
       if (!session) {
-        return res.redirect('/login');
+        return res.redirect('/accounts/login');
       }
       return res.render('projects/new', { user: session.user });
   }
@@ -54,7 +54,7 @@ export class ProjectController {
       headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
     
     const project = await this.projectService.resolve(projectSlug);
@@ -77,7 +77,7 @@ export class ProjectController {
       headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
 
     const project = await this.projectService.resolve(projectSlug);

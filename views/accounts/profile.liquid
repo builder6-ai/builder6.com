@@ -1,0 +1,78 @@
+{% layout 'app' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8" x-data="profilePage">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">My Profile</h1>
+            <p class="text-gray-400">Manage your account settings and preferences.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Sidebar Navigation (Optional, or just content) -->
+        <div class="md:col-span-1 space-y-2">
+            <a href="/accounts/profile" class="block px-4 py-2 rounded-lg bg-white/10 text-white font-medium">General</a>
+            <a href="/accounts/password/change" class="block px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Security</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- Profile Information -->
+            <div class="bg-[#1c1c1e] rounded-2xl border border-white/10 p-6 shadow-lg">
+                <h3 class="text-xl font-bold text-white mb-6">Profile Information</h3>
+                
+                <form @submit.prevent="updateProfile" class="space-y-4">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-inner">
+                            {{ user.name | slice: 0, 1 | upcase | default: 'U' }}
+                        </div>
+                        <div>
+                             <p class="text-white font-medium">{{ user.email }}</p>
+                             <p class="text-xs text-gray-500">Avatar depends on your name</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Display Name</label>
+                        <input type="text" x-model="name" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200" placeholder="Your Name">
+                    </div>
+
+                    <div class="pt-4 flex justify-end">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold transition-colors shadow-lg shadow-blue-900/20">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('profilePage', () => ({
+            name: '{{ user.name }}',
+            async updateProfile() {
+                try {
+                    const res = await fetch('/api/auth/update-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: this.name })
+                    });
+                     if (res.ok) {
+                        $notify('Profile updated successfully', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        const data = await res.json();
+                        $notify(data.message || 'Failed to update profile', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    $notify('An error occurred', 'error');
+                }
+            }
+        }))
+    })
+</script>
+{% endblock %}

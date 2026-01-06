@@ -12,7 +12,7 @@ export class OrganizationsController {
         headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
 
     const organizations = await (this.authService.auth.api as any).listOrganizations({
@@ -31,7 +31,7 @@ export class OrganizationsController {
         headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
 
     return res.render('organizations/new', { 
@@ -45,7 +45,7 @@ export class OrganizationsController {
         headers: new Headers(req.headers as any),
     });
     if (!session) {
-      return res.redirect('/login');
+      return res.redirect('/accounts/login');
     }
 
     const organizations = await (this.authService.auth.api as any).listOrganizations({

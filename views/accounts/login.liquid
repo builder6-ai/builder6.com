@@ -41,7 +41,10 @@
                 <input type="email" x-model="email" required class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200" placeholder="name@example.com">
             </div>
             <div class="space-y-1">
-                <label class="block text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Password</label>
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Password</label>
+                    <a href="/accounts/password/reset" class="text-xs text-[#0A84FF] hover:text-[#409CFF] transition-colors">Forgot password?</a>
+                </div>
                 <input type="password" x-model="password" required class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200" placeholder="••••••••">
             </div>
             <button type="submit" class="w-full bg-[#007AFF] hover:bg-[#0062cc] text-white py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg shadow-blue-900/30 hover:shadow-blue-900/50 transform hover:-translate-y-0.5 mt-2">Sign In</button>
@@ -49,7 +52,7 @@
 
         <div class="mt-8 text-center text-sm text-gray-400">
             <span>Don't have an account?</span>
-            <a href="/register" class="text-[#0A84FF] hover:text-[#409CFF] font-medium ml-1 transition-colors">Sign Up</a>
+            <a href="/accounts/register" class="text-[#0A84FF] hover:text-[#409CFF] font-medium ml-1 transition-colors">Sign Up</a>
         </div>
         
     </div>
