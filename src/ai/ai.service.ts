@@ -44,11 +44,17 @@ export class AiService {
     
     If 'currentCode' is provided, you should modify it according to the user's instructions.
     If 'currentCode' is not provided, you should generate a new page from scratch.
+
+    Tech Stack & Environment:
+    - Styling: Tailwind CSS (CDN loaded).
+    - Icons: Remix Icon (CDN loaded, e.g. <i class="ri-home-line"></i>).
+    - Interactivity: Alpine.js (CDN loaded, e.g. x-data="{ open: false }").
+
+    Important Constraints:
+    - The page is rendered inside a layout that ALREADY contains a sidebar/header navigation. DO NOT regenerate the main navigation menu or sidebar. Focus on the specific page content.
+    - If generating a full page, you can include <html>, <head>, <body> tags. The system will automatically process specific layout adjustments.
     
     Return ONLY the HTML code. Do not include markdown backticks or explanations.
-    Ensure the code is a complete HTML fragment or full page as appropriate, but primarily focus on the body content or the specific component requested.
-    If the user asks for a full page, include <html>, <head>, <body> tags.
-    Use Tailwind CSS for styling.
     `;
 
     const userMessage = currentCode 

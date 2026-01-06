@@ -15,7 +15,7 @@
     <script>
         window.PROJECT_ID = "{{ projectId }}";
         window.PROJECT_SLUG = "{{ project.slug }}";
-        window.PAGE = {{ page | json }};
+        window.PAGE = {{ page | json | replace: '</', '<\\/' }};
     </script>
     
     {% render 'partials/notifications.liquid' %}
@@ -300,7 +300,7 @@
         </div>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.min.js"></script>
 
     <script>
         // Sidebar Toggle Logic
@@ -460,7 +460,7 @@
         let lastSavedCode = defaultCode;
 
         // 2. 初始化 Monaco Editor
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' }});
         
         require(['vs/editor/editor.main'], async function() {
             // 解析 URL 中的代码（如果有）

@@ -18,8 +18,45 @@ export class PageService {
     return result;
   }
 
+  private sanitizeProjectCode(code: string): string {
+    if (!code) return code;
+    
+    // Check if it's a full HTML document
+    if (code.match(/<!DOCTYPE html>/i) || code.match(/<html/i)) {
+      
+      // 1. Remove DOCTYPE
+      let newCode = code.replace(/<!DOCTYPE html>/gi, '');
+
+      // 2. Remove html tags
+      newCode = newCode.replace(/<html[^>]*>/gi, '').replace(/<\/html>/gi, '');
+
+      // 3. Remove title and meta tags
+      newCode = newCode.replace(/<title>[\s\S]*?<\/title>/gi, '');
+      newCode = newCode.replace(/<meta[^>]*>/gi, '');
+
+      // 4. Remove head tags but KEEP content (scripts, styles)
+      newCode = newCode.replace(/<head[^>]*>/gi, '').replace(/<\/head>/gi, '');
+
+      // 5. Transform body tag to div, and fix classes
+      newCode = newCode.replace(/<body([^>]*)>/gi, (match, attrs) => {
+          let newAttrs = attrs
+            .replace(/h-screen/g, 'h-full')
+            .replace(/w-screen/g, 'w-full');
+          
+          return `<div id="body-wrapper" ${newAttrs}>`;
+      });
+      
+      newCode = newCode.replace(/<\/body>/gi, '</div>');
+
+      return newCode.trim();
+    }
+    
+    return code;
+  }
+
   async save(createPageDto: CreatePageDto, userId?: string): Promise<Page> {
-    const { code, id, projectId, name, metaTitle, slug, addToNavigation } = createPageDto;
+    const { code: rawCode, id, projectId, name, metaTitle, slug, addToNavigation } = createPageDto;
+    const code = this.sanitizeProjectCode(rawCode);
     const now = new Date();
 
     // 1. Try to update existing page if ID is provided
