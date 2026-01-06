@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { Page } from './schemas/page.schema';
-import { Project } from './schemas/project.schema';
+import { Project } from '../projects/schemas/project.schema';
 import { PageVersion } from './schemas/page-version.schema';
 import { CreatePageDto } from './dto/create-page.dto';
 

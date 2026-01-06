@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Param, Post, Put, Req, Res } from '@nestjs/co
 import { Request, Response } from 'express';
 import { ProjectService } from './project.service';
 import { AuthService } from '../auth/auth.service';
-import { PageService } from './page.service';
+import { PageService } from '../pages/page.service';
 
 @Controller('api/projects')
 export class ProjectApiController {

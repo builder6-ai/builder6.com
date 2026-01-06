@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Res, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { PageService } from './page.service';
-import { ProjectService } from './project.service';
+import { ProjectService } from '../projects/project.service';
 
 @Controller('app')
 export class SiteController {

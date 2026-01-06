@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Delete, Req, Res, Render, Redi
 import { Request, Response } from 'express';
 import { ProjectService } from './project.service';
 import { AuthService } from '../auth/auth.service';
-import { PageService } from './page.service';
+import { PageService } from '../pages/page.service';
 import { ObjectsService } from '../objects/objects.service'; // Import ObjectsService
 
 @Controller('interfaces')
