@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     {% render 'partials/head.liquid' %}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <title>Builder6</title>
     <style>
         html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -182,7 +183,10 @@
 
     <main id="mainContainer" class="flex-1 flex overflow-hidden flex-row relative">
         <!-- Sidebar -->
-        <div id="sidebar" class="w-64 bg-[#1c1c1e] border-r border-white/10 flex flex-col hidden md:flex transition-all duration-300">
+        <div id="sidebar" class="w-64 bg-[#1c1c1e] border-r border-white/10 flex flex-col hidden md:flex transition-all duration-300 relative group/sidebar">
+            <!-- Resizer Handle -->
+            <div id="sidebarResizer" class="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-blue-500/50 z-50 transition-colors"></div>
+            
             <!-- Project Header -->
             <div class="p-6 flex items-center justify-between">
                 <div class="flex flex-col overflow-hidden">
@@ -203,9 +207,12 @@
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
+            <div id="pagesList" class="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
                 {% for p in pages %}
-                <div class="group flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all {% if p._id == page._id %}bg-blue-600 text-white shadow-lg shadow-blue-900/20{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+                <div data-id="{{ p._id }}" class="group flex items-center justify-between pl-2 pr-4 py-2.5 rounded-lg text-sm font-medium transition-all {% if p._id == page._id %}bg-blue-600 text-white shadow-lg shadow-blue-900/20{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+                    <div class="drag-handle p-1 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity mr-1 text-white/50 hover:text-white" title="Drag to reorder">
+                        <i class="ri-draggable"></i>
+                    </div>
                     <a href="/app/{{ project._id }}/{{ p._id }}" class="flex-1 truncate flex items-center gap-2">
                         <span>{{ p.name | default: "Untitled Page" }}</span>
                         {% if p.homePage == p._id %}<span class="text-xs opacity-70" title="Home Page">🏠</span>{% endif %}
@@ -300,6 +307,42 @@
         const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
         const sidebarExpandBtn = document.getElementById('sidebarExpandBtn');
         const sidebar = document.getElementById('sidebar');
+        const sidebarResizer = document.getElementById('sidebarResizer');
+        
+        let isResizing = false;
+        let lastDownX = 0;
+
+        // Mouse down event
+        sidebarResizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            lastDownX = e.clientX;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none'; // Prevent text selection
+        });
+
+        // Mouse move event (attached to document)
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            const newWidth = e.clientX; // Calculate new width based on mouse position
+            
+            // Set constraints (min 150px, max 600px)
+            if (newWidth >= 150 && newWidth <= 600) {
+                sidebar.style.width = `${newWidth}px`;
+            }
+        });
+
+        // Mouse up event (attached to document)
+        document.addEventListener('mouseup', (e) => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                
+                // Trigger any necessary resize events (e.g. for Monaco editor)
+                window.dispatchEvent(new Event('resize'));
+            }
+        });
         
         function toggleSidebar() {
             const style = window.getComputedStyle(sidebar);
@@ -1124,6 +1167,34 @@
 
             modelSelect.addEventListener('change', () => {
                 localStorage.setItem('ai_selected_model', modelSelect.value);
+            });
+        }
+
+        // Initialize Sidebar Sortable
+        const pagesList = document.getElementById('pagesList');
+        if (pagesList) {
+            new Sortable(pagesList, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'bg-white/5',
+                onEnd: async function (evt) {
+                    const items = Array.from(pagesList.children).map((el, index) => ({
+                        id: el.getAttribute('data-id'),
+                        sortOrder: index
+                    }));
+                    
+                    try {
+                        await fetch('/api/pages/reorder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ items })
+                        });
+                    } catch (error) {
+                        console.error('Failed to reorder pages:', error);
+                    }
+                }
             });
         }
 

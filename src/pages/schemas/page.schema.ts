@@ -8,6 +8,7 @@ export class Page {
   metaTitle?: string;
   slug?: string; // URL slug, e.g. 'sign-up'
   addToNavigation?: boolean;
+  sortOrder?: number;
 
   // Steedos Standard Fields
   owner?: string;

@@ -40,6 +40,14 @@ export class PageController {
     return this.PageService.getVersions(id);
   }
 
+  @Post('reorder')
+  async reorder(@Body() body: { items: { id: string; sortOrder: number }[] }, @Req() req: Request): Promise<void> {
+    const session = await this.authService.auth.api.getSession({
+      headers: new Headers(req.headers as any),
+    });
+    return this.PageService.reorder(body.items, session?.user?.id);
+  }
+
 
 }
 

@@ -86,8 +86,21 @@ export class PageService {
   async findAllByProject(projectId: string): Promise<Page[]> {
     return this.db.collection<Page>('builder6_pages')
       .find({ projectId })
-      .sort({ modified: -1 })
+      .sort({ sortOrder: 1, modified: -1 })
       .toArray();
+  }
+
+  async reorder(items: { id: string, sortOrder: number }[], userId?: string): Promise<void> {
+    const bulkOps = items.map(item => ({
+      updateOne: {
+        filter: { _id: item.id, owner: userId },
+        update: { $set: { sortOrder: item.sortOrder } }
+      }
+    }));
+
+    if (bulkOps.length > 0) {
+      await this.db.collection<Page>('builder6_pages').bulkWrite(bulkOps);
+    }
   }
 
   async getVersions(pageId: string): Promise<PageVersion[]> {
