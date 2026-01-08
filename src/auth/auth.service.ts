@@ -20,8 +20,16 @@ export class AuthService implements OnModuleInit {
     const { mongodbAdapter } = await _importDynamic('better-auth/adapters/mongodb');
     const { organization } = await _importDynamic('better-auth/plugins');
 
+    const getBaseUrl = () => {
+        if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+        if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+        return 'http://localhost:3000';
+    };
+
+    const baseURL = getBaseUrl();
+
     this.auth = betterAuth({
-      baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+      baseURL,
       plugins: [
         organization({
             schema: {
@@ -42,7 +50,6 @@ export class AuthService implements OnModuleInit {
                 }
             },
             async sendInvitationEmail(data) {
-                const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
                 const inviteLink = `${baseURL}/accounts/accept-invitation/${data.id}`;
                 console.log('========================================');
                 console.log('📧 ORGANIZATION INVITATION');
